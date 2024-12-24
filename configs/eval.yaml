@@ -1,0 +1,20 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - data: ogb # choose datamodule with `test_dataloader()` for evaluation
+  - model: visnet_ogb
+  - callbacks: default
+  - logger: null
+  - trainer: default
+  - paths: default
+  - extras: default
+  - hydra: default
+  - experiment: null
+
+task_name: "eval"
+
+tags: ["ogb", "visnet"]
+
+# passing checkpoint path is necessary for evaluation
+ckpt_path: ???

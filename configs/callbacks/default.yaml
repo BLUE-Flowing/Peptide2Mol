@@ -1,0 +1,23 @@
+defaults:
+  - model_checkpoint
+  - model_summary
+  - rich_progress_bar
+  - early_stopping
+  - _self_
+
+model_checkpoint:
+  dirpath: ${paths.output_dir}/checkpoints
+  filename: "epoch_{epoch:03d}_{train_loss:.4f}"
+  monitor: "train_loss"
+  mode: "min"
+  save_last: True
+  auto_insert_metric_name: False
+  save_top_k: 5
+
+model_summary:
+  max_depth: -1
+
+early_stopping:
+  monitor: "train_loss"
+  patience: 100
+  mode: "min"
