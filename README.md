@@ -101,7 +101,7 @@ pip install tensorboard==2.16.2
         ++model.net.sample.gui_dir=$PWD/ckpts/PMT_comparison.ckpt
      ```
 
-> **Note:** The `ckpt` files can be downloaded from Google Drive. Generating one molecule typically takes about one minute on an H800 GPU.
+> **Note:** Generating one molecule typically takes about one minute on an H800 GPU.
 
 ---
 
