@@ -1,13 +1,17 @@
+Here’s a polished version of your README file:
+
+---
+
 # Peptide2Mol: A Diffusion Model for Transforming Peptide Binders into Small Molecules
 
-Peptide2Mol is a diffusion-based method for generating small-molecule candidates from peptide binders in drug design. This repository provides the necessary code, instructions, and model weights for inference or retraining. If you have any questions, feel free to [open an issue](https://github.com/Xinheng-He/peptide2mol/issues) or reach out via email at [he-xinheng@foxmail.com](mailto:he-xinheng@foxmail.com).
+**Peptide2Mol** is a diffusion-based method for generating small-molecule candidates from peptide binders in drug design. This repository provides the necessary code, instructions, and model weights for inference or retraining. For any questions or issues, feel free to [open an issue](https://github.com/Xinheng-He/peptide2mol/issues) or reach out via email at [he-xinheng@foxmail.com](mailto:he-xinheng@foxmail.com).
 
 ---
 
 ## Table of Contents
 1. [Dataset](#dataset)
 2. [Setup Environment](#setup-environment)
-3. [Running Peptide2Mol on a Test System](#running-peptide2mol-on-a-test-system)
+3. [Running Peptide2Mol](#running-peptide2mol)
 4. [Retraining Peptide2Mol](#retraining-peptide2mol)
 5. [License](#license)
 
@@ -15,8 +19,9 @@ Peptide2Mol is a diffusion-based method for generating small-molecule candidates
 
 ## Dataset
 
-To train the main Peptide2Mol model, you can download either the processed or original data from Zenodo.  
-- If you have the raw data in the `raw_data` folder, you can convert it into the necessary `.pt` format by running:  
+To train the main Peptide2Mol model, download either the processed or original data from Zenodo.
+
+- If you have raw data in the `raw_data` folder, convert it into the required `.pt` format by running:  
   ```bash
   python ./notebooks/deal_with_mol_5A.py ./raw_data/final_csv_goodH.csv ./raw_data/sdf ./data_all5.pt
   ```
@@ -25,7 +30,7 @@ To train the main Peptide2Mol model, you can download either the processed or or
 
 ## Setup Environment
 
-Below is an example of how to set up an Anaconda environment to run Peptide2Mol. Make sure to install the correct versions of PyTorch, PyTorch-Geometric, CUDA (if you have a GPU), etc. You can also adjust versions as needed if you prefer newer releases:
+Follow these steps to set up an Anaconda environment for running Peptide2Mol. Ensure compatibility by installing the specified versions of PyTorch, PyTorch-Geometric, CUDA (if applicable), and other dependencies:
 
 ```bash
 git clone https://github.com/Xinheng-He/peptide2mol
@@ -46,68 +51,88 @@ pip install numba==0.59.1
 pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.2.2+cu121.html
 pip install easydict==1.13
 pip install tensorboard==2.16.2
+pip install Bio==1.6.2
 ```
 
-> **Note:** Installation can take up to one hour on a typical Linux machine.
+> **Note:** Installation may take up to one hour on a typical Linux machine.
 
 ---
 
-## Running Peptide2Mol on a Test System
+## Running Peptide2Mol
 
-1. **Prepare Protein Inputs**  
-   Your protein input should be a `.pdb` file containing residues within 6 Å of the peptide ligand (i.e., if any heavy atom of a residue lies within 6 Å of any heavy atom of the ligand, include the entire residue).  
-   - In PyMOL, for example, you can use:
-     ```bash
-     select sel_poc, br. (sele around 5)
-     ```
-     and then save `sel_poc` as `xxx_poc.pdb` in a folder like `./poc_test/`.
+### Step 1: Prepare Protein Inputs
 
-2. **Generate `.pt` Files**  
-   Run the following to generate `.pt` files for further generation:
-   ```bash
-   python ./notebooks/deal_with_mol_test_from_pdb_pal_5A.py ./poc_test/
-   ```
+Prepare a `.pdb` file containing residues within 6 Å of the peptide ligand. For example, in PyMOL, you can use:
 
-3. **Inference**  
-   - **Without guidance:**
-     ```bash
-     python src/eval.py experiment=mol_test \
-        ckpt_path=$PWD/ckpts/PMT_major.ckpt \
-        ++paths.data_dir=$PWD/poc_test/ \
-        +data.lmdb_fn=5wbj_MTOR_poc.pt \
-        data=mol_test_true \
-        model=Moldiff_test \
-        data.infer_batch_size=2 \
-        trainer.devices=1 \
-        ++paths.log_dir=./logs_1223_test \
-        ++model.net.sample.log_dir=$PWD/sample_test \
-        ++model.net.sample.pdb_dir=$PWD/poc_test \
-        ++model.net.sample.batch_size=10
-     ```
-   - **With guidance:**
-     ```bash
-     python src/eval.py experiment=mol_test_gui \
-        ckpt_path=$PWD/ckpts/PMT_major.ckpt \
-        ++paths.data_dir=$PWD/poc_test/ \
-        +data.lmdb_fn=5wbj_MTOR_poc.pt \
-        data=mol_test_true \
-        model=Moldiff_gui_comp \
-        data.infer_batch_size=2 \
-        trainer.devices=1 \
-        ++paths.log_dir=./logs_1224_test \
-        ++model.net.sample.log_dir=$PWD/sample_test \
-        ++model.net.sample.pdb_dir=$PWD/poc_test \
-        ++model.net.sample.batch_size=1 \
-        ++model.net.sample.gui_dir=$PWD/ckpts/PMT_comparison.ckpt
-     ```
+```bash
+select sel_poc, br. (sele around 6)
+```
 
-> **Note:** Generating one molecule typically takes about one minute on an H800 GPU.
+Save the selection as `xxx_poc.pdb` in a folder such as `./poc_test/`.
+
+### Step 2: Generate `.pt` Files
+
+Run the following command to generate `.pt` files for inference:
+
+```bash
+python ./notebooks/deal_with_mol_test_from_pdb_pal_5A.py ./poc_test/
+```
+
+### Step 3: Inference
+
+#### Without Guidance:
+
+```bash
+python src/eval.py experiment=mol_test \
+  ckpt_path=$PWD/ckpts/PMT_major.ckpt \
+  ++paths.data_dir=$PWD/poc_test/ \
+  +data.lmdb_fn=5wbj_MTOR_poc.pt \
+  data=mol_test_true \
+  model=Moldiff_test \
+  data.infer_batch_size=2 \
+  trainer.devices=1 \
+  ++paths.log_dir=./logs_1223_test \
+  ++model.net.sample.log_dir=$PWD/sample_test \
+  ++model.net.sample.pdb_dir=$PWD/poc_test \
+  ++model.net.sample.batch_size=10
+```
+
+#### With Guidance:
+
+```bash
+python src/eval.py experiment=mol_test_gui \
+  ckpt_path=$PWD/ckpts/PMT_major.ckpt \
+  ++paths.data_dir=$PWD/poc_test/ \
+  +data.lmdb_fn=5wbj_MTOR_poc.pt \
+  data=mol_test_true \
+  model=Moldiff_gui_comp \
+  data.infer_batch_size=2 \
+  trainer.devices=1 \
+  ++paths.log_dir=./logs_1224_test \
+  ++model.net.sample.log_dir=$PWD/sample_test \
+  ++model.net.sample.pdb_dir=$PWD/poc_test \
+  ++model.net.sample.batch_size=1 \
+  ++model.net.sample.gui_dir=$PWD/ckpts/PMT_comparison.ckpt
+```
+
+### Step 4: Fix Molecules with Pocket2Mol
+
+1. Organize your folder with an input folder containing subfolders of Peptide2Mol-generated molecules (folder endswith `_SDF`).  
+2. Run the following command to fix molecules using Pocket2Mol (casp means only the folder include name "casp" will be fixed, you can change it to what you like):
+
+```bash
+python get_wrong_atom_index_0h.py $PWD/inp_folder/ casp
+```
+
+The output will be saved in `inp_folder_output`.
+
+> **Note:** The `ckpt` files are available for download via Google Drive. Generating one molecule typically takes about one minute on an H800 GPU.
 
 ---
 
 ## Retraining Peptide2Mol
 
-Use `src/train.py` to retrain the model. If your data is located in `../data_all5.pt`, you can run:
+To retrain the model, use the `src/train.py` script. For example, if your data is located in `../data_all5.pt`, run:
 
 ```bash
 python src/train.py experiment=mol_test \
@@ -123,8 +148,12 @@ python src/train.py experiment=mol_test \
 
 ## License
 
-[MIT](./LICENSE)
+This project is licensed under the [MIT License](./LICENSE).
 
----  
+---
 
-*Thank you for using Peptide2Mol! If you have any questions or encounter any issues, please let us know.*
+Thank you for using **Peptide2Mol**! If you have any questions or encounter any issues, please don't hesitate to reach out.
+
+--- 
+
+Let me know if further adjustments are needed!
