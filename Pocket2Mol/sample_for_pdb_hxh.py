@@ -74,6 +74,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--pdb_path', type=str,
                         default='/home/chengxi/data/work/test/comp2404/PMT/PMT_0718/Pocket2Mol/example/1eeo_PTN1_poc_origin.pdb')
+    parser.add_argument('--log_path_name', type=str,
+                        default='1eeo_PTN1_poc')
     parser.add_argument('--to_be_removed', type=lambda s: list(map(int, s.split(','))),
                         default=[1, 3, 7, 8, 11], 
                         help='the atoms to be removed, start from 0')
@@ -90,10 +92,7 @@ if __name__ == '__main__':
     seed_all(config.sample.seed)
 
     # Logging
-    log_dir = get_new_log_dir(args.outdir, prefix='%s_%s' % (
-        os.path.basename(args.pdb_path).split('_poc')[0],
-        os.path.basename(args.ligand_path)[:-4],
-    ))
+    log_dir = get_new_log_dir(args.outdir, prefix= args.log_path_name)
     logger = get_logger('sample', log_dir)
     logger.info(args)
     logger.info(config)

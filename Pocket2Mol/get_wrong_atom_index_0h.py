@@ -635,7 +635,8 @@ for fn in os.listdir(f'{init_dir}'):
                 for sub_fns1 in os.listdir(f'{init_dir}/{fn}'):
                     x_list = []
                     y_list = []
-                    if sub_fns1.endswith('sdf') and f'{sub_fns[:-15]}_{sub_fns1[:-4]}' not in dealed_fn_list:
+                    log_path_name = fn[:-4].replace('_poc','') + sub_fns1.split(sub_fns[:-15])[-1][:-4]
+                    if sub_fns1.endswith('sdf') and log_path_name not in dealed_fn_list:
                         mol_pred = read_sdf_file(f"{init_dir}/{fn}/{sub_fns1}")
                         bad_bond_angle = check_geometry(mol_pred)
                         if len(check_intermolecular_distance(mol_pred, mol_cond)) > 1:
@@ -644,7 +645,9 @@ for fn in os.listdir(f'{init_dir}'):
                             x_list.extend(get_three_atom_rings(mol_pred))
                         if len(bad_bond_angle) > 0:
                             x_list.extend(bad_bond_angle)
-                        print(sub_fns[:-15], sub_fns1, f'{sub_fns[:-15]}_{sub_fns1[:-4]}' not in dealed_fn_list)
+                        
+
+                        print(fn[:-4].replace('_poc',''), sub_fns[:-15], sub_fns1.split(sub_fns[:-15])[-1][:-4], log_path_name not in dealed_fn_list)
                         # exit()
                         
                         if len(x_list) > 0:
@@ -659,6 +662,6 @@ for fn in os.listdir(f'{init_dir}'):
                             x_str = ','.join(x_list)
 
                             
-                            os.system(f'python sample_for_pdb_hxh.py --pdb_path {init_dir}/{fn}/{sub_fns} --to_be_removed {x_str} --ligand_path {init_dir}/{fn}/{sub_fns1} --outdir {sys.argv[1][:-1]}_output')
+                            os.system(f'python sample_for_pdb_hxh.py --pdb_path {init_dir}/{fn}/{sub_fns} --log_path_name  {log_path_name} --to_be_removed {x_str} --ligand_path {init_dir}/{fn}/{sub_fns1} --outdir {sys.argv[1][:-1]}_output')
                     # os.system(f'python sample_for_pdb_random.py --pdb_path {init_dir}/{fn}/{sub_fns}  --ligand_path {init_dir}/{fn}/{sub_fns1}')
 print(np.mean(bad_property), np.std(bad_property))
