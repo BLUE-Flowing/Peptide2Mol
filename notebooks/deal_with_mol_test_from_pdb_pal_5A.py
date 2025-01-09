@@ -235,15 +235,7 @@ def parse_drug3d_mol(mol, diffu_idx, name):
                     bond_type.extend([5, 5])
                     bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
                     bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
-                    num_bonds += 1  # Assign a special type for non-bonded interactions within 4 Å
-                # else:
-                #     row.extend([i, j])
-                #     col.extend([j, i])
-                #     bond_type.extend([6, 6])
-                #     bond_feats_all.append([0, 0, 0, 0, 0, 0, 0])
-                #     bond_feats_all.append([0, 0, 0, 0, 0, 0, 0])
-                #     num_bonds += 1  # Assign a special type for without non-bonded interactions within 4 Å
-
+                    num_bonds += 1  
     # Prepare final arrays
     bond_index = np.array([row, col], dtype=np.int64)
     bond_type = np.array(bond_type, dtype=np.int64)
@@ -269,16 +261,12 @@ def parse_drug3d_mol(mol, diffu_idx, name):
     # print(diff_bond_type, diff_bond_index, 'before perm')
 
     perm = (diff_bond_index[0] * num_atoms + diff_bond_index[1]).argsort() 
-     # 换个顺序，把bond_index的【0】从0开始往后排
     diff_bond_index = diff_bond_index[:, perm]
     diff_bond_type = diff_bond_type[perm]
     diff_bond_features = diff_bond_features[perm]
 
-    # print(diff_bond_type, diff_bond_index, 'after perm')
-
     for index, pairs in enumerate(bond_index.T):
         if pairs[0] in indices_list or pairs[1] in indices_list:
-            # print(index, pairs, 'index, pairs')
             diff_bond_type_idx.append(index)
 
     data = {
