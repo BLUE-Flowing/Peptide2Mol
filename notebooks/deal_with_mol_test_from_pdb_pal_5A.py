@@ -22,14 +22,13 @@ def torchify_dict(data):
 
 def get_period_group(atom):
     atomic_number = atom.GetAtomicNum()
-    # 仅覆盖前三周期的常见元素
     periods = {1: 1, 2: 1, 3: 1, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 2, 10: 2,
                11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3}
     groups = {1: 1, 2: 8, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7, 10: 8,
               11: 1, 12: 2, 13: 3, 14: 4, 15: 5, 16: 6, 17: 7, 18: 8}
     
-    period = periods.get(atomic_number, -1)  # 默认值为-1
-    group = groups.get(atomic_number, -1)    # 默认值为-1
+    period = periods.get(atomic_number, -1)  
+    group = groups.get(atomic_number, -1) 
     return period, group
 
 
@@ -58,7 +57,7 @@ def calc_atom_features(atom):
             + [atom.GetFormalCharge(), atom.GetNumRadicalElectrons()]     \
             + one_of_k_encoding_unk(atom.GetHybridization(), hybrid_type) \
             + [atom.GetIsAromatic()] \
-            + [period, group]  # 添加周期和主族数
+            + [period, group] 
 
     
                                         

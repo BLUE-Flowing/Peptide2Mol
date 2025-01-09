@@ -22,14 +22,13 @@ def torchify_dict(data):
 
 def get_period_group(atom):
     atomic_number = atom.GetAtomicNum()
-    # 仅覆盖前三周期的常见元素
     periods = {1: 1, 2: 1, 3: 1, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 2, 10: 2,
                11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3}
     groups = {1: 1, 2: 8, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7, 10: 8,
               11: 1, 12: 2, 13: 3, 14: 4, 15: 5, 16: 6, 17: 7, 18: 8}
     
-    period = periods.get(atomic_number, -1)  # 默认值为-1
-    group = groups.get(atomic_number, -1)    # 默认值为-1
+    period = periods.get(atomic_number, -1) 
+    group = groups.get(atomic_number, -1) 
     return period, group
 
 
@@ -58,7 +57,7 @@ def calc_atom_features(atom):
             + [atom.GetFormalCharge(), atom.GetNumRadicalElectrons()]     \
             + one_of_k_encoding_unk(atom.GetHybridization(), hybrid_type) \
             + [atom.GetIsAromatic()] \
-            + [period, group]  # 添加周期和主族数
+            + [period, group] 
 
     
                                         
@@ -212,9 +211,7 @@ def parse_drug3d_mol(mol, diffu_idx, name):
             diff_bond_features.append(bond_feats)
             diff_row.extend([start, end])
             diff_col.extend([end, start])
-    # print(np.array(bond_type).shape,'bond_type')
-    # print(np.array(bond_feats_all).shape,'bond_feats_all')
-    # assert False
+
     pocket_or_not_list = np.zeros([num_atoms]) 
 
     # Check for non-bonded interactions within cutoff and add them
@@ -230,15 +227,7 @@ def parse_drug3d_mol(mol, diffu_idx, name):
                     bond_type.extend([5, 5])
                     bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
                     bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
-                    num_bonds += 1  # Assign a special type for non-bonded interactions within 4 Å
-                # else:
-                #     row.extend([i, j])
-                #     col.extend([j, i])
-                #     bond_type.extend([6, 6])
-                #     bond_feats_all.append([0, 0, 0, 0, 0, 0, 0])
-                #     bond_feats_all.append([0, 0, 0, 0, 0, 0, 0])
-                #     num_bonds += 1  # Assign a special type for without non-bonded interactions within 4 Å
-
+                    num_bonds += 1  
     # Prepare final arrays
     bond_index = np.array([row, col], dtype=np.int64)
     bond_type = np.array(bond_type, dtype=np.int64)
@@ -261,15 +250,12 @@ def parse_drug3d_mol(mol, diffu_idx, name):
     diff_bond_index = np.array([diff_row, diff_col],dtype=np.int64)
     diff_bond_features = np.array(diff_bond_features, dtype=np.int64)
 
-    # print(diff_bond_type, diff_bond_index, 'before perm')
 
     perm = (diff_bond_index[0] * num_atoms + diff_bond_index[1]).argsort() 
-     # 换个顺序，把bond_index的【0】从0开始往后排
     diff_bond_index = diff_bond_index[:, perm]
     diff_bond_type = diff_bond_type[perm]
     diff_bond_features = diff_bond_features[perm]
 
-    # print(diff_bond_type, diff_bond_index, 'after perm')
 
     for index, pairs in enumerate(bond_index.T):
         if pairs[0] in indices_list or pairs[1] in indices_list:
