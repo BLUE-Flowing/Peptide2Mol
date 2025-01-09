@@ -341,10 +341,6 @@ def main():
                 mol = Chem.RemoveAllHs(mol)
                 ligand_dict = parse_drug3d_mol(mol, diffu_idx, mol_id)
                 ligand_dict = torchify_dict(ligand_dict)
-                # print(ligand_dict)
-                # print_atom_features(ligand_dict)
-                # print_bond_features(ligand_dict)
-                # assert False
                 data = Drug3DData.from_drug3d_dicts(ligand_dict)
 
                 data.mol_id = mol_id+str(_)
