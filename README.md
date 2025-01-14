@@ -82,7 +82,7 @@ python ./notebooks/deal_with_mol_test_from_pdb_pal_5A.py ./poc_test/
 python src/eval.py experiment=mol_test \
   ckpt_path=$PWD/ckpts/PMT_major.ckpt \
   ++paths.data_dir=$PWD/poc_test/ \
-  +data.lmdb_fn=5wbj_MTOR_poc.pt \
+  +data.lmdb_fn=5una_7SK_poc.pt \
   data=mol_test_true \
   model=Moldiff_test \
   data.infer_batch_size=1 \
@@ -99,7 +99,7 @@ python src/eval.py experiment=mol_test \
 python src/eval.py experiment=mol_test_gui \
   ckpt_path=$PWD/ckpts/PMT_major.ckpt \
   ++paths.data_dir=$PWD/poc_test/ \
-  +data.lmdb_fn=5wbj_MTOR_poc.pt \
+  +data.lmdb_fn=5una_7SK_poc.pt \
   data=mol_test_true \
   model=Moldiff_gui_comp \
   data.infer_batch_size=1 \
@@ -117,6 +117,7 @@ python src/eval.py experiment=mol_test_gui \
 2. Run the following command to fix molecules using Pocket2Mol (casp means only the folder include name "casp" will be fixed, you can change it to what you like):
 
 ```bash
+cd Pocket2Mol
 python get_wrong_atom_index_0h.py $PWD/inp_folder/ casp
 ```
 
