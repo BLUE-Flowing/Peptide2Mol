@@ -221,7 +221,3 @@ This project is licensed under the [MIT License](./LICENSE).
 ---
 
 Thank you for using **Peptide2Mol**! If you have any questions or encounter any issues, please don't hesitate to reach out.
-
---- 
-
-Let me know if further adjustments are needed!
