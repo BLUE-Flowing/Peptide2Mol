@@ -52,6 +52,7 @@ net:
       width: 3
   sample:
     num_mols: 50
+    max_size: null
     guidance: null
     batch_size: 2
     log_dir: ./0830

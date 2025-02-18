@@ -65,6 +65,7 @@ net:
       - uncertainty
       - 1.e-4
     batch_size: 2
+    max_size: null
     log_dir: ./0830
     pdb_dir: ./testcase_0520
     gui_dir: ./ckpts/PMT_comparison.ckpt

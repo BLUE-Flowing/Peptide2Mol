@@ -74,7 +74,7 @@ class MolWrapper(nn.Module):
         gui_model.load_state_dict(new_state_dict)
         gui_model = gui_model.to(batch_holder['batch_node'].device)
         sdf_dir = self.log_dir + '_SDF'
-        os.makedirs(sdf_dir, exist_ok=True)f
+        os.makedirs(sdf_dir, exist_ok=True)
         while len(pool.finished) < self.num_mols:
             batch_holder = self.make_mydata_placeholder(n_graphs=n_graphs, ref_data1 = batch, device=batch.pos.device, max_size=None)
             batch_node, halfedge_index, batch_halfedge, ref_data, n_nodes_list = batch_holder['batch_node'], batch_holder['halfedge_index'], batch_holder['batch_halfedge'], batch_holder['ref_data'], batch_holder['n_nodes_list']
