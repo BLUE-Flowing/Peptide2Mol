@@ -28,12 +28,9 @@ class MolWrapper(nn.Module):
         self.log_dir = layer_configs['sample']['log_dir']
         self.pdb_dir = layer_configs['sample']['pdb_dir']
         self.sample_batch_size = layer_configs['sample']['batch_size']
-        # exit()
-        # self.molecule_combine = NonLinear(node_width * 3, node_width, node_width)
-        # self.combine = NonLinear(node_width * 2, node_width, node_width)
+        self.sample_max = layer_configs['sample']['max_size']
 
     def forward(self, batch):
-        # print(batch)
         pos_noise = torch.randn_like(batch.node_pos) * self.pos_noise_std
         node_for_loss, pred_node_for_loss, pos_for_loss, pred_pos_for_loss, halfedge_for_loss, pred_halfedge_for_loss = self.model.get_loss(
                 # compose
@@ -66,7 +63,7 @@ class MolWrapper(nn.Module):
         })
         batch_size = self.sample_batch_size
         n_graphs = min(batch_size, (self.num_mols - len(pool.finished))*2)
-        batch_holder = self.make_mydata_placeholder(n_graphs=n_graphs, ref_data = batch, device=batch.pos.device, max_size=None)
+        batch_holder = self.make_mydata_placeholder(n_graphs=n_graphs, ref_data = batch, device=batch.pos.device, max_size=self.sample_max)
         sdf_dir = self.log_dir + '_SDF'
         os.makedirs(sdf_dir, exist_ok=True)
         while len(pool.finished) < self.num_mols:
@@ -139,6 +136,17 @@ class MolWrapper(nn.Module):
         
 
         pool.finished.extend(gen_list)
+
+    def idx_for_edge(self, additional_node_number, edge_tuple):
+        return_tuple = []
+        for item in edge_tuple:
+            if item >= additional_node_number:
+                return_tuple.append(item-additional_node_number)
+            else:
+                return_tuple.append(item)
+        return tuple(return_tuple)
+
+
     def make_mydata_placeholder(self, n_graphs, ref_data, device=None, max_size=None):
 
         if max_size is None:  # use statistics from GEOM-Drug dataset
@@ -166,7 +174,7 @@ class MolWrapper(nn.Module):
             batch_halfedge.append(np.full(n_edges_this_mol, i_mol))
             for i in range(n_nodes):
                 diffu_idx.append(i + idx_start)
-            idx_start += (n_nodes + ref_data.num_nodes)
+            
 
             node_padding_init = torch.randn(n_nodes,29)
             ref_data = ref_data.to(node_padding_init.device)
@@ -187,16 +195,19 @@ class MolWrapper(nn.Module):
 
             for ix, edge in enumerate(this_mol_halfedge_index_T):
                 edge_tuple = tuple(edge.tolist())
+                true_edge_tuple = self.idx_for_edge(n_nodes+idx_start, edge_tuple)
                 
-                if edge_tuple in ref_index_to_type:
-                    type_index = ref_index_to_type[edge_tuple]
+                if true_edge_tuple in ref_index_to_type:
+                    type_index = ref_index_to_type[true_edge_tuple]
                     long_edge_types.append(ref_data.halfedge_type[type_index])
                 else:
                     long_edge_types.append(torch.tensor([0, 0, 0, 0, 0, 0, 0, 1]))
 
             long_edge_types = torch.stack(long_edge_types)
+            idx_start += (n_nodes + ref_data.num_nodes)
 
             half_edge_padding.append(long_edge_types)
+
 
         batch_node = torch.LongTensor(batch_node)
         batch_halfedge = torch.LongTensor(np.concatenate(batch_halfedge))

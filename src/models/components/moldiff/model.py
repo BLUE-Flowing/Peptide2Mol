@@ -141,6 +141,16 @@ class MolWrapper(nn.Module):
 
         pool.finished.extend(gen_list)
 
+    def idx_for_edge(self, additional_node_number, edge_tuple):
+        return_tuple = []
+        for item in edge_tuple:
+            if item >= additional_node_number:
+                return_tuple.append(item-additional_node_number)
+            else:
+                return_tuple.append(item)
+        return tuple(return_tuple)
+
+
     def make_mydata_placeholder(self, n_graphs, ref_data, device=None, max_size=None):
         if max_size is None:  # use statistics from GEOM-Drug dataset
             n_nodes_list = np.random.normal(24.923464980477522, 5.516291901819105, size=n_graphs)
@@ -166,7 +176,8 @@ class MolWrapper(nn.Module):
             batch_halfedge.append(np.full(n_edges_this_mol, i_mol))
             for i in range(n_nodes):
                 diffu_idx.append(i + idx_start)
-            idx_start += (n_nodes + ref_data.num_nodes)
+            
+
             node_padding_init = torch.randn(n_nodes,29)
             ref_data = ref_data.to(node_padding_init.device)
             type_padded = torch.cat([node_padding_init, ref_data.node_type])
@@ -186,16 +197,19 @@ class MolWrapper(nn.Module):
 
             for ix, edge in enumerate(this_mol_halfedge_index_T):
                 edge_tuple = tuple(edge.tolist())
-                if edge_tuple in ref_index_to_type:
-                    type_index = ref_index_to_type[edge_tuple]
+                true_edge_tuple = self.idx_for_edge(n_nodes+idx_start, edge_tuple)
+                
+                if true_edge_tuple in ref_index_to_type:
+                    type_index = ref_index_to_type[true_edge_tuple]
                     long_edge_types.append(ref_data.halfedge_type[type_index])
                 else:
                     long_edge_types.append(torch.tensor([0, 0, 0, 0, 0, 0, 0, 1]))
 
             long_edge_types = torch.stack(long_edge_types)
-
+            idx_start += (n_nodes + ref_data.num_nodes)
 
             half_edge_padding.append(long_edge_types)
+
 
         batch_node = torch.LongTensor(batch_node)
         batch_halfedge = torch.LongTensor(np.concatenate(batch_halfedge))

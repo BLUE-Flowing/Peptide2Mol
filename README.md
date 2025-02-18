@@ -66,13 +66,49 @@ select sel_poc, br. (sele around 6)
 
 Save the selection as `xxx_poc.pdb` in a folder such as `./poc_test/`.
 
-### Step 2: Generate `.pt` Files
+## Step 2: Generate `.pt` Files
 
-Run the following command to generate `.pt` files for inference:
+To generate `.pt` files for inference, follow these steps:
+
+### 1. Generate `.pt` Files for All PDB Files Containing 'poc' in Their Filename
+
+Run the following command to read all PDB files with 'poc' in their filename and generate `.pt` files. Ensure that the corresponding SDF files share the same suffix name:
 
 ```bash
 python ./notebooks/deal_with_mol_test_from_pdb_pal_5A.py ./poc_test/
 ```
+
+This will process all PDB files in the `./poc_test/` directory containing 'poc' in their filenames, along with the matching SDF files, and generate the corresponding `.pt` files.
+
+### 2. Generate `.pt` Files for Partial Ligand Parts
+
+If you wish to generate `.pt` files for only part of the ligand, follow these steps:
+
+1. **Combine the Pocket PDB and the Ligand into One SDF File**  
+   First, combine the pocket PDB and ligand into a single SDF file.
+
+2. **Prepare the CSV File**  
+   Next, create a CSV file (e.g., `poc_test/partial_input.csv`) with the following format:
+
+   ```csv
+   filename,diffu_idx,remove_idx
+   PBmol_2qtg.sdf,0;1;2;3;4;5;6;7;8;9,10;11;12;13;14;15;16;17;18;19
+   ```
+
+   - `diffu_idx`: The indices of the ligand atoms that will be kept (all atoms except those to be removed).
+   - `remove_idx`: The indices of the atoms that will be removed during diffusion.
+
+3. **Run the Command for `.pt` File Generation**  
+   Use the following command to generate the `.pt` files for the partial ligand:
+
+   ```bash
+   python ./notebooks/deal_with_mol_remove_5A.py poc_test/partial_input.csv poc_test/ poc_test/
+   ```
+
+   - The first `poc_test/` specifies the path to the SDF files.
+   - The second `poc_test/` specifies the output path where the `.pt` files will be saved.
+   
+   Adjust the paths according to your needs.
 
 ### Step 3: Inference
 
@@ -85,12 +121,29 @@ python src/eval.py experiment=mol_test \
   +data.lmdb_fn=5wbj_MTOR_poc.pt \
   data=mol_test_true \
   model=Moldiff_test \
+  data.infer_batch_size=2 \
+  trainer.devices=1 \
+  ++paths.log_dir=./logs_1223_test \
+  ++model.net.sample.log_dir=$PWD/sample_test \
+  ++model.net.sample.pdb_dir=$PWD/poc_test \
+  ++model.net.sample.batch_size=1
+```
+
+#### Partial generation without Guidance:
+
+```bash
+python src/eval.py experiment=mol_test \
+  ckpt_path=$PWD/ckpts/PMT_major.ckpt \
+  ++paths.data_dir=$PWD/poc_test/ \
+  +data.lmdb_fn=PBmol_2qtg.pt \
+  data=mol_test_true \
+  model=Moldiff_test_partial \
   data.infer_batch_size=1 \
   trainer.devices=1 \
   ++paths.log_dir=./logs_1223_test \
   ++model.net.sample.log_dir=$PWD/sample_test \
   ++model.net.sample.pdb_dir=$PWD/poc_test \
-  ++model.net.sample.batch_size=10
+  ++model.net.sample.batch_size=1
 ```
 
 #### With Guidance:
@@ -102,7 +155,7 @@ python src/eval.py experiment=mol_test_gui \
   +data.lmdb_fn=5wbj_MTOR_poc.pt \
   data=mol_test_true \
   model=Moldiff_gui_comp \
-  data.infer_batch_size=1 \
+  data.infer_batch_size=2 \
   trainer.devices=1 \
   ++paths.log_dir=./logs_1224_test \
   ++model.net.sample.log_dir=$PWD/sample_test \
@@ -111,13 +164,31 @@ python src/eval.py experiment=mol_test_gui \
   ++model.net.sample.gui_dir=$PWD/ckpts/PMT_comparison.ckpt
 ```
 
+#### Partial generation with Guidance:
+
+```bash
+python src/eval.py experiment=mol_test_gui \
+  ckpt_path=$PWD/ckpts/PMT_major.ckpt \
+  ++paths.data_dir=$PWD/poc_test/ \
+  +data.lmdb_fn=PBmol_2qtg.pt \
+  data=mol_test_true \
+  model=Moldiff_gui_comp_partial \
+  data.infer_batch_size=1 \
+  trainer.devices=1 \
+  ++paths.log_dir=./logs_1223_test \
+  ++model.net.sample.log_dir=$PWD/sample_test \
+  ++model.net.sample.pdb_dir=$PWD/poc_test \
+  ++model.net.sample.batch_size=1
+  ++model.net.sample.gui_dir=$PWD/ckpts/PMT_comparison.ckpt
+```
+
+
 ### Step 4: Fix Molecules with Pocket2Mol
 
 1. Organize your folder with an input folder containing subfolders of Peptide2Mol-generated molecules (folder endswith `_SDF`).  
 2. Run the following command to fix molecules using Pocket2Mol (casp means only the folder include name "casp" will be fixed, you can change it to what you like):
 
 ```bash
-cd Pocket2Mol
 python get_wrong_atom_index_0h.py $PWD/inp_folder/ casp
 ```
 
@@ -152,3 +223,5 @@ This project is licensed under the [MIT License](./LICENSE).
 Thank you for using **Peptide2Mol**! If you have any questions or encounter any issues, please don't hesitate to reach out.
 
 --- 
+
+Let me know if further adjustments are needed!

@@ -117,21 +117,9 @@ class FeaturizeMol(object):
         data.diff_idx = atom_mask.clone().detach()
 
         pos_mask = torch.ones_like(data.node_pos, dtype=torch.bool)
-        # print(data, pos_mask, data.node_pos)
-        # exit()
         pos_mask[data.diffu_idx] = False
         data.diff_pos_idx = pos_mask.clone().detach()
 
-        # print('data.diffused atoms',data.diffu_idx, 
-        #       'data.diff_idx',data.diff_idx,
-        #         'data.diff_bond_type_idx',data.diff_bond_type_idx, 
-        #         'data.diff_pos_idx',data.diff_pos_idx)
-        # print(data)
-        # exit()
-
-
-        # assert (data.halfedge_type > 0).sum() == data.num_bonds  # 这里不等了的原因是你的data.halfedge_type > 0还加上了非共价边，但是num_bonds只有共价边
-        # exit()
         return data
     
     def decode_output(self, pred_node, pred_pos, pred_halfedge, halfedge_index):

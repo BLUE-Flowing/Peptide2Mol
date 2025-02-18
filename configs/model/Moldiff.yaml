@@ -53,8 +53,8 @@ net:
   sample:
     num_mols: 100
     guidance: null
-    log_dir: /home/chengxi/data/work/test/comp2404/PMT/sam_result/0830
-    pdb_dir: /home/chengxi/data/work/test/comp2404/PMT/PMT_0718/testcase_0520
+    log_dir: ./0830
+    pdb_dir: ./testcase_0520
 
 compile: false
 

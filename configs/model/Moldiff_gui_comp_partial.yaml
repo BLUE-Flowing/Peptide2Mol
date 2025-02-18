@@ -16,7 +16,7 @@ scheduler:
   patience: 3
 
 net:
-  _target_: src.models.components.moldiff_test.model.MolWrapper
+  _target_: src.models.components.moldiff_gui_comp_partial.model.MolWrapper
   input_node_dim: 29
   input_edge_dim: 8
   pos_noise_std: 0.05
@@ -24,10 +24,19 @@ net:
   edge_dim: 64
   time_dim: 10
   poc_dim: 10
+  node_dim_gui: 128
+  edge_dim_gui: 32
+  time_dim_gui: 10
+  poc_dim_gui: 10
   bond_len_loss: False
   denoiser:
     backbone: NodeEdgeNet
     num_blocks: 6
+    cutoff: 15
+    use_gate: True
+  denoiser_gui:
+    backbone: NodeEdgeNet
+    num_blocks: 3
     cutoff: 15
     use_gate: True
   diff:
@@ -51,11 +60,15 @@ net:
       scale_end: 0.0001
       width: 3
   sample:
-    num_mols: 50
-    guidance: null
+    num_mols: 100
+    max_size: 10
+    guidance: 
+      - uncertainty
+      - 1.e-4
     batch_size: 2
     log_dir: ./0830
     pdb_dir: ./testcase_0520
+    gui_dir: ./ckpts/PMT_comparison.ckpt
 
 compile: false
 

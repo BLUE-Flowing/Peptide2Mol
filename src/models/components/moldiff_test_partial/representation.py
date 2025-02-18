@@ -130,7 +130,6 @@ class MolDiff(Module):
         pos_pert = self.pos_transition.add_noise(node_pos, time_step, batch_node, diff_pos_idx)
         # print(node_type,'node_type in model',node_type.shape)
         node_pert = self.node_transition.add_noise(node_type, time_step, batch_node, diff_idx)
-
         halfedge_pert = self.edge_transition.add_noise(halfedge_type, time_step, batch_halfedge, diff_bond_type_idx)
         edge_index = torch.cat([halfedge_index, halfedge_index.flip(0)], dim=1)  # undirected edges
         batch_edge = torch.cat([batch_halfedge, batch_halfedge], dim=0)
@@ -186,14 +185,9 @@ class MolDiff(Module):
         # print(h_node_pert.shape, h_node_pert, poc_or_not)
         mask = poc_or_not == 1
         selected_h_node_pert = h_node_pert[mask]
-        # print(selected_h_node_pert, 'selected_h_node_pert')
         h_node_pert = h_node_pert.to(torch.float16)
         time_embed_node = time_embed_node.to(torch.float16)
         poc_embed_node = poc_embed_node.to(torch.float16)
-        # print(h_node_pert.shape, time_embed_node.shape, poc_embed_node.shape,self.node_embedder(h_node_pert).shape)
-        # print(self.node_embedder(h_node_pert).dtype)
-        # print(time_embed_node.dtype)
-        # print(poc_embed_node.dtype)
         h_node_pert = torch.cat([self.node_embedder(h_node_pert), time_embed_node, poc_embed_node], dim=-1)
         time_embed_edge = self.time_emb(t.index_select(0, batch_edge))
         h_edge_pert = torch.cat([self.edge_embedder(h_edge_pert), time_embed_edge], dim=-1)
@@ -320,13 +314,13 @@ class MolDiff(Module):
         # pred_halfedge = torch.where(ref_data.bond_mask, halfedge_init, halfedge_traj[-1])
         # exit()
         # print(node_traj[-1], ref_data.atom_mask, node_traj[-1].shape,  ref_data.atom_mask.shape)
-        pred_node = node_traj[-1][~ref_data.atom_mask].reshape(-1, ref_data.atom_mask.shape[-1])
-        pred_pos = pos_traj[-1][~ref_data.pos_mask].reshape(-1, ref_data.pos_mask.shape[-1])
-        pred_halfedge = torch.where(ref_data.bond_mask, halfedge_init, halfedge_traj[-1])
-        origin_node = node_traj[-1][ref_data.atom_mask].reshape(-1, ref_data.atom_mask.shape[-1])
-        origin_pos = pos_traj[-1][ref_data.pos_mask].reshape(-1, ref_data.pos_mask.shape[-1])
+        pred_node = node_traj[-1][~ref_data.atom_mask_recon].reshape(-1, ref_data.atom_mask_recon.shape[-1])
+        pred_pos = pos_traj[-1][~ref_data.pos_mask_recon].reshape(-1, ref_data.pos_mask_recon.shape[-1])
+        pred_halfedge = torch.where(ref_data.bond_mask_recon, ref_data.half_edge_padding, halfedge_traj[-1])
+        origin_node = node_traj[-1][ref_data.atom_mask_recon].reshape(-1, ref_data.atom_mask_recon.shape[-1])
+        origin_pos = pos_traj[-1][ref_data.pos_mask_recon].reshape(-1, ref_data.pos_mask_recon.shape[-1])
         # pred_halfedge = halfedge_traj[-1][~ref_data.bond_mask].reshape(-1, ref_data.bond_mask.shape[-1])
-        # print(pred_node, pred_pos, pred_halfedge,pred_node.shape, pred_pos.shape, pred_halfedge.shape, 'pred_node, pred_pos, pred_halfedge,')
+        # print(pred_node.shape, pred_pos.shape, pred_halfedge.shape, ref_data.bond_mask.shape, 'pred_node, pred_pos, pred_halfedge,')
 
         return {
             'pred': [pred_node, pred_pos, pred_halfedge],

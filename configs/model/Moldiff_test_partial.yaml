@@ -16,7 +16,7 @@ scheduler:
   patience: 3
 
 net:
-  _target_: src.models.components.moldiff_test.model.MolWrapper
+  _target_: src.models.components.moldiff_test_partial.model.MolWrapper
   input_node_dim: 29
   input_edge_dim: 8
   pos_noise_std: 0.05
@@ -52,8 +52,9 @@ net:
       width: 3
   sample:
     num_mols: 50
+    max_size: 10
     guidance: null
-    batch_size: 2
+    batch_size: 1
     log_dir: ./0830
     pdb_dir: ./testcase_0520
 

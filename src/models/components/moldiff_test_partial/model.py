@@ -9,7 +9,7 @@ from copy import deepcopy
 import itertools
 import re, os
 # from .layers.embed import NonLinear
-from .representation import MolDiff, MolComp
+from .representation import MolDiff
 from easydict import EasyDict
 
 
@@ -22,18 +22,15 @@ class MolWrapper(nn.Module):
         super().__init__()
         print(layer_configs)
         self.model = MolDiff(**layer_configs)
-        self.layer_configs = layer_configs
         self.pos_noise_std = layer_configs['pos_noise_std']
         self.num_mols = layer_configs['sample']['num_mols']
         self.guidance = layer_configs['sample']['guidance']
         self.log_dir = layer_configs['sample']['log_dir']
         self.pdb_dir = layer_configs['sample']['pdb_dir']
-        self.gui_dir = layer_configs['sample']['gui_dir']
         self.sample_batch_size = layer_configs['sample']['batch_size']
         self.sample_max = layer_configs['sample']['max_size']
 
     def forward(self, batch):
-        # print(batch)
         pos_noise = torch.randn_like(batch.node_pos) * self.pos_noise_std
         node_for_loss, pred_node_for_loss, pos_for_loss, pred_pos_for_loss, halfedge_for_loss, pred_halfedge_for_loss = self.model.get_loss(
                 # compose
@@ -66,19 +63,12 @@ class MolWrapper(nn.Module):
         })
         batch_size = self.sample_batch_size
         n_graphs = min(batch_size, (self.num_mols - len(pool.finished))*2)
-        batch_holder = self.make_mydata_placeholder(n_graphs=n_graphs, ref_data1 = batch, device=batch.pos.device, max_size=self.sample_max)
-        ckpt_bond = torch.load(self.gui_dir, map_location=batch_holder['batch_node'].device)
-        gui_model = MolComp(self.layer_configs)
-        state_dict = ckpt_bond['state_dict']
-        new_state_dict = {key.replace('nn.model.', ''): value for key, value in state_dict.items()}
-        gui_model.load_state_dict(new_state_dict)
-        gui_model = gui_model.to(batch_holder['batch_node'].device)
+        batch_holder = self.make_mydata_placeholder(n_graphs=n_graphs, ref_data = batch, device=batch.pos.device, max_size=self.sample_max)
         sdf_dir = self.log_dir + '_SDF'
-        os.makedirs(sdf_dir, exist_ok=True)f
+        os.makedirs(sdf_dir, exist_ok=True)
         while len(pool.finished) < self.num_mols:
-            batch_holder = self.make_mydata_placeholder(n_graphs=n_graphs, ref_data1 = batch, device=batch.pos.device, max_size=None)
             batch_node, halfedge_index, batch_halfedge, ref_data, n_nodes_list = batch_holder['batch_node'], batch_holder['halfedge_index'], batch_holder['batch_halfedge'], batch_holder['ref_data'], batch_holder['n_nodes_list']
-            name_use = ref_data.name[0]
+            name_use = ref_data.name[0][:-4]
             outputs = self.model.sample(
                 n_graphs=n_graphs,
                 batch_node=batch_node,
@@ -86,9 +76,8 @@ class MolWrapper(nn.Module):
                 batch_halfedge=batch_halfedge,
                 ref_data=ref_data,
                 traj_fn=f'{sdf_dir}/{name_use}_{len(pool.finished)+len(pool.failed)}.xyz',
-                bond_predictor=gui_model,
+                bond_predictor=None,
                 guidance=self.guidance,
-
                 
             )
             outputs = {key:[v.cpu().numpy() for v in value] for key, value in outputs.items()}
@@ -96,10 +85,13 @@ class MolWrapper(nn.Module):
             if not os.path.exists(os.path.join(sdf_dir, f'{name_use}_origin.pdb')):
                 try:
                     output_list = self.seperate_outputs_origin(outputs, n_graphs, batch_node, halfedge_index, batch_halfedge, n_nodes_list)
+                    # print(output_list, 'output_list')
                 except:
                     traceback.print_exc()
                     continue
                 gen_list = []
+                # print(output_list)
+                # exit()
                 for i_mol, output_mol in enumerate(output_list):
                     mol_info = self.decode_output(
                         pred_node=output_mol['pred'][0],
@@ -116,7 +108,6 @@ class MolWrapper(nn.Module):
                 traceback.print_exc()
                 continue
             gen_list = []
-            print(output_list)
             for i_mol, output_mol in enumerate(output_list):
                 mol_info = self.decode_output(
                     pred_node=output_mol['pred'][0],
@@ -124,7 +115,7 @@ class MolWrapper(nn.Module):
                     pred_halfedge=output_mol['pred'][2],
                     halfedge_index=output_mol['halfedge_index'],
                 )
-                #pickle.dump(mol_info,open('mol_info0902.pkl','wb'))
+                pickle.dump(mol_info, open(f'/home/chengxi/data/work/test/comp2404/PMT/PMT_1214/sam_250114/{len(pool.failed)}_mol.pkl','wb'))
                 try:
                     rdmol = self.reconstruct_from_generated_with_edges(mol_info)
                 except:
@@ -157,36 +148,39 @@ class MolWrapper(nn.Module):
         return tuple(return_tuple)
 
 
-    def make_mydata_placeholder(self, n_graphs, ref_data1, device=None, max_size=None):
-        ref_data = deepcopy(ref_data1)
+    def make_mydata_placeholder(self, n_graphs, ref_data, device=None, max_size=None):
+
         if max_size is None:  # use statistics from GEOM-Drug dataset
             n_nodes_list = np.random.normal(24.923464980477522, 5.516291901819105, size=n_graphs)
-            print(n_nodes_list)
         else:
+            print(f'User defined max size = {max_size}')
             n_nodes_list = np.array([max_size] * n_graphs)
         n_nodes_list = n_nodes_list.astype('int64')
+
         batch_node = np.concatenate([np.full(n_nodes + ref_data.num_nodes, i) for i, n_nodes in enumerate(n_nodes_list)]) 
         halfedge_index = []
         batch_halfedge = []
         idx_start = 0
         diffu_idx = []
+        diffu_idx_recon = []
         node_padding = []
         pos_padding = []
         half_edge_padding = []
+        ref_data_ligand_num = (ref_data.pocket_or_not == 0).sum().item()
 
 
 
         for i_mol, n_nodes in enumerate(n_nodes_list):
             halfedge_index_this_mol = torch.triu_indices(n_nodes + ref_data.num_nodes, 
-                                                        n_nodes + ref_data.num_nodes, offset=1)
-            halfedge_index.append(halfedge_index_this_mol + idx_start)
+                                                        n_nodes + ref_data.num_nodes, offset=1)  
+            halfedge_index.append(halfedge_index_this_mol + idx_start)  
             n_edges_this_mol = len(halfedge_index_this_mol[0])
             batch_halfedge.append(np.full(n_edges_this_mol, i_mol))
             for i in range(n_nodes):
                 diffu_idx.append(i + idx_start)
             
 
-            node_padding_init = torch.randn(n_nodes,29)
+            node_padding_init = torch.randn(n_nodes, 29)
             ref_data = ref_data.to(node_padding_init.device)
             type_padded = torch.cat([node_padding_init, ref_data.node_type])
             node_padding.append(type_padded)
@@ -214,10 +208,9 @@ class MolWrapper(nn.Module):
                     long_edge_types.append(torch.tensor([0, 0, 0, 0, 0, 0, 0, 1]))
 
             long_edge_types = torch.stack(long_edge_types)
-            idx_start += (n_nodes + ref_data.num_nodes)
 
             half_edge_padding.append(long_edge_types)
-
+            idx_start += (n_nodes + ref_data.num_nodes)
 
         batch_node = torch.LongTensor(batch_node)
         batch_halfedge = torch.LongTensor(np.concatenate(batch_halfedge))
@@ -225,8 +218,6 @@ class MolWrapper(nn.Module):
 
 
         diffu_idx_tensor = torch.tensor(diffu_idx)
-        print(diffu_idx_tensor)
-        # exit()
 
         # Transpose halfedge_index for easier comparison
         halfedge_index_T = halfedge_index.T
@@ -241,6 +232,8 @@ class MolWrapper(nn.Module):
         # Get the indices where the condition is True
         diff_bond_type_idx = torch.nonzero(mask).squeeze()
 
+        # print(diff_bond_type_idx, batch_node, 'diff_bond_type_idx, batch_node')
+
         # Convert to a list if needed
         diff_bond_type_idx = diff_bond_type_idx.tolist()
     
@@ -251,6 +244,59 @@ class MolWrapper(nn.Module):
         bond_mask = bond_mask.clone()  # Clone the tensor before modification
         bond_mask[diff_bond_type_idx] = False
         ref_data.bond_mask = bond_mask.clone().detach()
+
+        pocket_or_not_list = torch.tensor([])
+        for i in range(n_graphs):
+            pocket_or_not_list = torch.cat([pocket_or_not_list, torch.zeros(n_nodes_list[i]), ref_data.pocket_or_not], dim=0)
+        ref_data.pocket_or_not = pocket_or_not_list.long() # torch.cat([torch.zeros(n_nodes), ref_data.pocket_or_not]*n_graphs, dim=0) #TODO
+
+        diffu_idx_recon = []
+        for num, i in enumerate(pocket_or_not_list):
+            if int(i) == 0:
+                diffu_idx_recon.append(num)
+
+        diffu_idx_recon_tensor = torch.tensor(diffu_idx_recon)
+
+        # Transpose halfedge_index for easier comparison
+        halfedge_index_T = halfedge_index.T
+
+        # Check if any element in halfedge_index_T is in diffu_idx_tensor
+        mask_0 = torch.isin(halfedge_index_T[:, 0], diffu_idx_recon_tensor)
+        mask_1 = torch.isin(halfedge_index_T[:, 1], diffu_idx_recon_tensor)
+
+        # Combine the masks using logical OR
+        mask = mask_0 | mask_1
+
+        # Get the indices where the condition is True
+        diff_bond_type_idx_recon = torch.nonzero(mask).squeeze()
+
+        # print(diff_bond_type_idx, batch_node, 'diff_bond_type_idx, batch_node')
+
+        # Convert to a list if needed
+        diff_bond_type_idx_recon = diff_bond_type_idx_recon.tolist()
+    
+
+        initial_bond_mask_recon = torch.ones_like(batch_halfedge, dtype=torch.bool)
+        initial_bond_mask_recon = initial_bond_mask_recon.unsqueeze(1)
+        bond_mask_recon = initial_bond_mask_recon.expand(-1, ref_data.halfedge_type.shape[1])
+        bond_mask_recon = bond_mask_recon.clone()  # Clone the tensor before modification
+        bond_mask_recon[diff_bond_type_idx_recon] = False
+        ref_data.bond_mask_recon = bond_mask_recon.clone().detach()
+
+        initial_atom_mask_recon = torch.ones_like(batch_node, dtype=torch.bool)
+        initial_atom_mask_recon = initial_atom_mask_recon.unsqueeze(1)
+        atom_mask_recon = initial_atom_mask_recon.expand(-1, ref_data.node_type.shape[1])
+        atom_mask_recon = atom_mask_recon.clone()
+        atom_mask_recon[diffu_idx_recon] = False
+        ref_data.atom_mask_recon = atom_mask_recon.clone().detach()
+
+        init_pos_mask_recon = torch.ones_like(batch_node, dtype=torch.bool)
+        init_pos_mask_recon = init_pos_mask_recon.unsqueeze(1)
+        pos_mask_recon = init_pos_mask_recon.expand(-1, 3)
+        pos_mask_recon = pos_mask_recon.clone()
+        pos_mask_recon[diffu_idx_recon] = False
+        ref_data.pos_mask_recon = pos_mask_recon.clone().detach()
+
 
         initial_atom_mask = torch.ones_like(batch_node, dtype=torch.bool)
         initial_atom_mask = initial_atom_mask.unsqueeze(1)
@@ -266,14 +312,11 @@ class MolWrapper(nn.Module):
         pos_mask[diffu_idx] = False
         ref_data.pos_mask = pos_mask.clone().detach()
 
-
         ref_data.node_padding = torch.cat(node_padding, dim=0)
         ref_data.pos_padding = torch.cat(pos_padding, dim=0)
         ref_data.half_edge_padding = torch.cat(half_edge_padding, dim=0)
-        pocket_or_not_list = torch.tensor([])
-        for i in range(n_graphs):
-            pocket_or_not_list = torch.cat([pocket_or_not_list, torch.zeros(n_nodes_list[i]), ref_data.pocket_or_not], dim=0)
-        ref_data.pocket_or_not = pocket_or_not_list.long() 
+
+
         if device is not None:
             batch_node = batch_node.to(device)
             batch_halfedge = batch_halfedge.to(device)
@@ -284,7 +327,7 @@ class MolWrapper(nn.Module):
             'halfedge_index': halfedge_index,
             'batch_halfedge': batch_halfedge,
             'ref_data': ref_data,
-            'n_nodes_list': [int(n_nodes) for n_nodes in n_nodes_list] 
+            'n_nodes_list': [int(n_nodes) + ref_data_ligand_num for n_nodes in n_nodes_list] #TODO add n_nodes_list for reconstruct
             # 'pocket_or_not': 
         }
 
@@ -326,6 +369,7 @@ class MolWrapper(nn.Module):
             ind_node = (batch_node == i_mol)
             ind_halfedge = (batch_halfedge == i_mol)
             assert ind_node.sum() * (ind_node.sum()-1) == ind_halfedge.sum() * 2
+
             pred_this = [outputs_pred[0][ind_node[:outputs_pred[0].shape[0]]],  # node type
                             outputs_pred[1][ind_node[:outputs_pred[1].shape[0]]],  # node pos
                             outputs_pred[2][ind_halfedge]]  # halfedge type
@@ -361,7 +405,6 @@ class MolWrapper(nn.Module):
         # add bonds
         for i, type_this in enumerate(bond_type):
             node_i, node_j = bond_index[0][i], bond_index[1][i]
-            #print(type_this)
             if node_i < node_j:
                 if type_this == 0:
                     rd_mol.AddBond(node_i, node_j, Chem.BondType.SINGLE)
@@ -506,7 +549,7 @@ class MolWrapper(nn.Module):
                 mol.GetAtomWithIdx(idx).SetFormalCharge(1)
             try:
                 if strict:
-                    mol, fixed = self.fix_valence(mol)
+                    mol, fixed = fix_valence(mol)
                 Chem.SanitizeMol(mol)
                 fixed = True
                 break
@@ -532,7 +575,7 @@ class MolWrapper(nn.Module):
                             mol.GetAtomWithIdx(idx).SetFormalCharge(1)
                     try:
                         if strict:
-                            mol, fixed = self.fix_valence(mol)
+                            mol, fixed = fix_valence(mol)
                         Chem.SanitizeMol(mol)
                         fixed = True
                         break
@@ -565,7 +608,6 @@ class MolWrapper(nn.Module):
         for n_sub in range(len(ring_list)+1):
             all_sub_list.extend(itertools.combinations(ring_list, n_sub))
         return all_sub_list
-
 
     def write_pdb_file(self, fn_in, coords, fn_out):
         with open(fn_in, 'r') as file_in, open(fn_out, 'w') as file_out:
