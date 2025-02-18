@@ -189,6 +189,7 @@ python src/eval.py experiment=mol_test_gui \
 2. Run the following command to fix molecules using Pocket2Mol (casp means only the folder include name "casp" will be fixed, you can change it to what you like):
 
 ```bash
+cd Pocket2Mol
 python get_wrong_atom_index_0h.py $PWD/inp_folder/ casp
 ```
 
