@@ -85,7 +85,7 @@ class MolWrapper(nn.Module):
                 batch_halfedge=batch_halfedge,
                 ref_data=ref_data,
                 traj_fn=f'{sdf_dir}/{name_use}_{len(pool.finished)+len(pool.failed)}.xyz',
-                bond_predictor=None,
+                bond_predictor=gui_model,
                 guidance=self.guidance,
                 
             )

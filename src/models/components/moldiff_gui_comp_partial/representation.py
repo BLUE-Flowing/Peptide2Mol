@@ -4,7 +4,7 @@ from torch.nn import Module
 from torch.nn import functional as F
 from .mytransition import ContigousTransition, GeneralCategoricalTransition
 from .mygraph import NodeEdgeNet
-
+import torch_scatter
 from .common import *
 from .diffusion import *
 
@@ -239,6 +239,25 @@ class MolComp(Module):
             time_step,
         )
         return preds
+
+
+    def encode_nonoise1(self, node_type, node_pos, batch_node,
+            halfedge_type, halfedge_index, batch_halfedge,
+            time_step, poc_or_not):
+
+        edge_index = torch.cat([halfedge_index, halfedge_index.flip(0)], dim=1)
+        batch_edge = torch.cat([batch_halfedge, batch_halfedge], dim=0)
+        h_edge_pert = torch.cat([halfedge_type, halfedge_type], dim=0)
+
+        # Forward pass through the model
+        preds = self(
+            node_type, node_pos, batch_node,
+            h_edge_pert, edge_index, batch_edge, poc_or_not,
+            time_step,
+        )
+        embeddings = self.get_graph_embeddings(preds, batch_node)
+        return embeddings.detach()
+
 
     def get_graph_embeddings(self, preds, batch_node):
         # Assuming preds['pred_node'] contains node features
@@ -607,6 +626,7 @@ class MolDiff(Module):
         h_halfedge_pert = h_halfedge_init
         edge_index = torch.cat([halfedge_index, halfedge_index.flip(0)], dim=1)
         batch_edge = torch.cat([batch_halfedge, batch_halfedge], dim=0)
+        pred_bondpredictor_list = []
         for i, step in tqdm(enumerate(range(self.num_timesteps)[::-1]), total=self.num_timesteps):
             time_step = torch.full(size=(n_graphs,), fill_value=step, dtype=torch.long).to(device)
             h_edge_pert = torch.cat([h_halfedge_pert, h_halfedge_pert], dim=0)
@@ -620,11 +640,7 @@ class MolDiff(Module):
             pred_node = preds['pred_node']  # (N, num_node_types)
             pred_pos = preds['pred_pos']  # (N, 3)
             pred_halfedge = preds['pred_halfedge']  # (E//2, num_bond_types)
-            # pred_node_for_xyz = pred_node.cpu().detach().numpy()
-            # atom_type_pred = np.argmax(pred_node_for_xyz[:, :8], axis=-1)
-            # atom_list = ['C', 'N', 'O', 'F', 'P', 'S', 'Cl', 'Br']
-            # element_pred = np.array([atom_list[i] for i in atom_type_pred])
-            # write_xyz_file_add(pred_pos, element_pred, f'{traj_fn}')
+
 
             # make only the diffu node, pos, edge update, but not all the nodes, pos, edges
             pred_node = torch.where(ref_data.atom_mask, ref_data.node_padding, pred_node)
@@ -646,6 +662,47 @@ class MolDiff(Module):
                 x_t=h_halfedge_pert, x_recon=pred_halfedge, t=time_step, batch=batch_halfedge)
             h_halfedge_prev = torch.where(ref_data.bond_mask, ref_data.half_edge_padding, h_halfedge_prev)
 
+            if guidance is not None:
+                gui_type, gui_scale = guidance
+                if (gui_scale > 0):
+                    with torch.enable_grad():
+                        h_node_in = h_node_pert
+                        pos_in = pos_pert.detach().requires_grad_(True)
+                        h_edge_in_half = h_halfedge_pert
+                        # h_edge_in = torch.cat([h_edge_in_half, h_edge_in_half], dim=0)
+
+                        pred_bondpredictor = bond_predictor.encode_nonoise(h_node_in, pos_in, batch_node,
+                                                            h_edge_in_half, halfedge_index, batch_halfedge, time_step, ref_data.pocket_or_not, )
+                        pred_bondpredictor1 = bond_predictor.encode_nonoise1(h_node_in, pos_in, batch_node,
+                                                            h_edge_in_half, halfedge_index, batch_halfedge, time_step, ref_data.pocket_or_not, )
+                        pred_bondpredictor_list.append([pred_bondpredictor.detach()
+                        , pred_bondpredictor1.detach()
+                        ])
+                        if gui_type == 'entropy':
+                            prob_halfedge = torch.softmax(pred_bondpredictor, dim=-1)
+                            entropy = - torch.sum(prob_halfedge * torch.log(prob_halfedge + 1e-12), dim=-1)
+                            entropy = entropy.log().sum()
+                            delta = - torch.autograd.grad(entropy, pos_in)[0] * gui_scale
+                        elif gui_type == 'uncertainty':
+                            uncertainty = torch.sigmoid( -torch.logsumexp(pred_bondpredictor, dim=-1))
+                            uncertainty = uncertainty.log().sum()
+                            delta = - torch.autograd.grad(uncertainty, pos_in)[0] * gui_scale
+                        elif gui_type == 'uncertainty_bond':  # only for the predicted real bond (not no bond)
+                            prob = torch.softmax(pred_bondpredictor, dim=-1)
+                            uncertainty = torch.sigmoid( -torch.logsumexp(pred_bondpredictor, dim=-1))
+                            uncertainty = uncertainty.log()
+                            uncertainty = (uncertainty * prob[:, 1:].detach().sum(dim=-1)).sum()
+                            delta = - torch.autograd.grad(uncertainty, pos_in)[0] * gui_scale
+                        elif gui_type == 'entropy_bond':
+                            prob_halfedge = torch.softmax(pred_bondpredictor, dim=-1)
+                            entropy = - torch.sum(prob_halfedge * torch.log(prob_halfedge + 1e-12), dim=-1)
+                            entropy = entropy.log()
+                            entropy = (entropy * prob_halfedge[:, 1:].detach().sum(dim=-1)).sum()
+                            delta = - torch.autograd.grad(entropy, pos_in)[0] * gui_scale
+
+                        else:
+                            raise NotImplementedError(f'Guidance type {gui_type} is not implemented')
+                    pos_prev = pos_prev + delta
 
             # log update
             node_traj[i+1] = h_node_prev
@@ -657,21 +714,13 @@ class MolDiff(Module):
             h_node_pert = h_node_prev
             h_halfedge_pert = h_halfedge_prev
 
-        # # 3. get the final positions
 
-        # only return the pred node, where ref_data_mask == False
-        # pred_node = torch.where(ref_data.atom_mask, node_init, node_traj[-1])
-        # pred_pos = torch.where(ref_data.pos_mask, pos_init, pos_traj[-1])
-        # pred_halfedge = torch.where(ref_data.bond_mask, halfedge_init, halfedge_traj[-1])
-        # exit()
-        # print(node_traj[-1], ref_data.atom_mask, node_traj[-1].shape,  ref_data.atom_mask.shape)
         pred_node = node_traj[-1][~ref_data.atom_mask_recon].reshape(-1, ref_data.atom_mask_recon.shape[-1])
         pred_pos = pos_traj[-1][~ref_data.pos_mask_recon].reshape(-1, ref_data.pos_mask_recon.shape[-1])
         pred_halfedge = torch.where(ref_data.bond_mask_recon, ref_data.half_edge_padding, halfedge_traj[-1])
         origin_node = node_traj[-1][ref_data.atom_mask_recon].reshape(-1, ref_data.atom_mask_recon.shape[-1])
         origin_pos = pos_traj[-1][ref_data.pos_mask_recon].reshape(-1, ref_data.pos_mask_recon.shape[-1])
-        # pred_halfedge = halfedge_traj[-1][~ref_data.bond_mask].reshape(-1, ref_data.bond_mask.shape[-1])
-        # print(pred_node.shape, pred_pos.shape, pred_halfedge.shape, ref_data.bond_mask.shape, 'pred_node, pred_pos, pred_halfedge,')
+        torch.save(pred_bondpredictor_list, traj_fn.replace('.xyz','_pred_bondpredictor_list.pt'))
 
         return {
             'pred': [pred_node, pred_pos, pred_halfedge],

@@ -245,6 +245,24 @@ class MolComp(Module):
         )
         return preds
 
+    def encode_nonoise1(self, node_type, node_pos, batch_node,
+            halfedge_type, halfedge_index, batch_halfedge,
+            time_step, poc_or_not):
+
+        edge_index = torch.cat([halfedge_index, halfedge_index.flip(0)], dim=1)
+        batch_edge = torch.cat([batch_halfedge, batch_halfedge], dim=0)
+        h_edge_pert = torch.cat([halfedge_type, halfedge_type], dim=0)
+
+        # Forward pass through the model
+        preds = self(
+            node_type, node_pos, batch_node,
+            h_edge_pert, edge_index, batch_edge, poc_or_not,
+            time_step,
+        )
+        embeddings = self.get_graph_embeddings(preds, batch_node)
+        return embeddings.detach()
+
+
     def get_graph_embeddings(self, preds, batch_node):
         # Assuming preds['pred_node'] contains node features
         node_embeddings = preds['pred_node']
@@ -503,8 +521,7 @@ class MolDiff(Module):
         # print(h_node_pert.shape, h_node_pert, poc_or_not)
         mask = poc_or_not == 1
         selected_h_node_pert = h_node_pert[mask]
-        # print(selected_h_node_pert, 'selected_h_node_pert')
-        # print('devices:',h_node_pert.device, time_embed_node.device, poc_embed_node.device,',h_node_pert.device, time_embed_node.device, poc_embed_node.device')
+
         h_node_pert = h_node_pert.to(torch.float16)
         time_embed_node = time_embed_node.to(torch.float16)
         poc_embed_node = poc_embed_node.to(torch.float16)
@@ -611,7 +628,7 @@ class MolDiff(Module):
             
             if guidance is not None:
                 gui_type, gui_scale = guidance
-                if (gui_scale > 0):
+                if (gui_scale >= 0):
                     with torch.enable_grad():
                         h_node_in = h_node_pert
                         pos_in = pos_pert.detach().requires_grad_(True)
@@ -620,7 +637,11 @@ class MolDiff(Module):
 
                         pred_bondpredictor = bond_predictor.encode_nonoise(h_node_in, pos_in, batch_node,
                                                             h_edge_in_half, halfedge_index, batch_halfedge, time_step, ref_data.pocket_or_not, )
-                        pred_bondpredictor_list.append(pred_bondpredictor.detach())
+                        pred_bondpredictor1 = bond_predictor.encode_nonoise1(h_node_in, pos_in, batch_node,
+                                                            h_edge_in_half, halfedge_index, batch_halfedge, time_step, ref_data.pocket_or_not, )
+                        pred_bondpredictor_list.append([pred_bondpredictor.detach()
+                        , pred_bondpredictor1.detach()
+                        ])
                         if gui_type == 'entropy':
                             prob_halfedge = torch.softmax(pred_bondpredictor, dim=-1)
                             entropy = - torch.sum(prob_halfedge * torch.log(prob_halfedge + 1e-12), dim=-1)

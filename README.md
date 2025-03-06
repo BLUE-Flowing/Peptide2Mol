@@ -199,12 +199,15 @@ The output will be saved in `inp_folder_output`.
 
 ---
 
-## Retraining Peptide2Mol
+## Retraining the Models
 
-To retrain the model, use the `src/train.py` script. For example, if your data is located in `../data_all5.pt`, run:
+### Retraining Peptide2Mol
+
+To retrain the main Peptide2Mol model, use the following command structure:
 
 ```bash
-python src/train.py experiment=mol_test \
+python src/train.py \
+  experiment=mol_test \
   ++paths.data_dir=$PWD/../ \
   +data.lmdb_fn=data_all5.pt \
   +data.num_train=370000 \
@@ -213,7 +216,41 @@ python src/train.py experiment=mol_test \
   logger=many_loggers
 ```
 
----
+**Key Parameters:**
+• `++paths.data_dir`: Path to directory containing your training data
+• `+data.lmdb_fn`: Filename of your training data file
+• `+data.num_train`: Number of training samples (adjust based on your dataset)
+• `++data.batch_size`: Batch size (reduce if encountering GPU memory issues)
+• `++paths.log_dir`: Directory to save training logs and checkpoints
+
+### Retraining the Guidance Model
+
+To retrain the guidance model, use this configuration:
+
+```bash
+python src/train.py \
+  experiment=comp_test \
+  ++paths.data_dir=$PWD \
+  +data.lmdb_fn=data_only_peptide5.pt \
+  +data.num_train=39000 \
+  ++data.batch_size=16 \
+  ++paths.log_dir=./logs_guidance \
+  trainer.devices=1 \
+  logger=many_loggers
+```
+
+**Guidance Model Notes:**
+• Uses a different dataset (`data_only_peptide5.pt`)
+• Typically requires fewer training samples
+• Set `trainer.devices` to match your available GPU count
+• Larger batch size recommended compared to main model
+
+**General Tips:**
+1. Ensure your data files are in the correct directory structure
+2. Adjust batch sizes according to your GPU memory capacity
+3. Monitor training progress through logs in specified `log_dir`
+4. Use absolute paths if running from different directories
+5. Consider using nohup or TMUX for long training sessions
 
 ## License
 
