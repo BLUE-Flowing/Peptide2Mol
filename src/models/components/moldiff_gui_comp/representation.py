@@ -329,8 +329,8 @@ class MolComp(Module):
         )
         
         n_halfedges = h_edge.shape[0] // 2
-        pred_node = self.node_decoder(h_node)
-        pred_halfedge = self.edge_decoder(h_edge[:n_halfedges]+h_edge[n_halfedges:])
+        pred_node = h_node
+        pred_halfedge = h_edge[:n_halfedges]+h_edge[n_halfedges:]
         pred_pos = pos_node
         
         return {
@@ -370,7 +370,7 @@ class MolComp(Module):
         )
         
         n_halfedges = h_edge.shape[0] // 2
-        pred_node = self.node_decoder(h_node)
+        pred_node = h_node
         
         return pred_node
 
