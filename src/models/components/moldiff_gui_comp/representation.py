@@ -639,9 +639,9 @@ class MolDiff(Module):
                                                             h_edge_in_half, halfedge_index, batch_halfedge, time_step, ref_data.pocket_or_not, )
                         pred_bondpredictor1 = bond_predictor.encode_nonoise1(h_node_in, pos_in, batch_node,
                                                             h_edge_in_half, halfedge_index, batch_halfedge, time_step, ref_data.pocket_or_not, )
-                        pred_bondpredictor_list.append([pred_bondpredictor.detach()
-                        , pred_bondpredictor1.detach()
-                        ])
+                       # pred_bondpredictor_list.append([pred_bondpredictor.detach()
+                       # , pred_bondpredictor1.detach()
+                       # ])
                         if gui_type == 'entropy':
                             prob_halfedge = torch.softmax(pred_bondpredictor, dim=-1)
                             entropy = - torch.sum(prob_halfedge * torch.log(prob_halfedge + 1e-12), dim=-1)
@@ -684,7 +684,7 @@ class MolDiff(Module):
         pred_halfedge = torch.where(ref_data.bond_mask, halfedge_init, halfedge_traj[-1])
         origin_node = node_traj[-1][ref_data.atom_mask].reshape(-1, ref_data.atom_mask.shape[-1])
         origin_pos = pos_traj[-1][ref_data.pos_mask].reshape(-1, ref_data.pos_mask.shape[-1])
-        torch.save(pred_bondpredictor_list, traj_fn.replace('.xyz','_pred_bondpredictor_list.pt'))
+       # torch.save(pred_bondpredictor_list, traj_fn.replace('.xyz','_pred_bondpredictor_list.pt'))
 
         return {
             'pred': [pred_node, pred_pos, pred_halfedge],
