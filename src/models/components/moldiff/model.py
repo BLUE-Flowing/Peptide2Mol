@@ -13,7 +13,6 @@ from .representation import MolDiff
 from easydict import EasyDict
 
 
-
 class MolWrapper(nn.Module):
     def __init__(
         self,
@@ -27,6 +26,7 @@ class MolWrapper(nn.Module):
         self.guidance = layer_configs['sample']['guidance']
         self.log_dir = layer_configs['sample']['log_dir']
         self.pdb_dir = layer_configs['sample']['pdb_dir']
+        self.loss_filename = layer_configs['loss_filename']
 
     def forward(self, batch):
         pos_noise = torch.randn_like(batch.node_pos) * self.pos_noise_std
