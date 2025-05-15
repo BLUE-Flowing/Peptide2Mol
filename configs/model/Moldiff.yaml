@@ -17,14 +17,15 @@ scheduler:
 
 net:
   _target_: src.models.components.moldiff.model.MolWrapper
-  input_node_dim: 29
-  input_edge_dim: 8
+  input_node_dim: 8
+  input_edge_dim: 6
   pos_noise_std: 0.05
   node_dim: 256
   edge_dim: 64
   time_dim: 10
   poc_dim: 10
   bond_len_loss: False
+  loss_filename: ./cases_losses.txt
   denoiser:
     backbone: NodeEdgeNet
     num_blocks: 6
