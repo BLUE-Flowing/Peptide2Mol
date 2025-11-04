@@ -1,11 +1,30 @@
-import pandas as pd
-import torch
-import os, sys
+"""
+====================================================================================
+Script: prepare_drug3d_dataset.py
+Project: Peptide2Mol
+Author: Xinheng He, Yijia Zhang, et al.
+Description:
+    This script converts molecular structures from SDF files into a PyTorch
+    Geometric-friendly dataset (LMDB format) for downstream use in diffusion-based
+    molecule generation or peptide-to-small-molecule modeling.
+
+    Each molecule is parsed into atomic and bond features, geometric coordinates,
+    and optionally diffusion indices (representing the peptide-derived atoms).
+
+    The final output is a serialized dataset stored in LMDB format for efficient
+    random access during training or evaluation.
+====================================================================================
+"""
+
+import os
+import sys
 import pickle
 import traceback
 import lmdb
 import numpy as np
 import pandas as pd
+import torch
+
 from rdkit import Chem
 from tqdm import tqdm
 from torch_geometric.data import Data
@@ -21,6 +40,10 @@ def torchify_dict(data):
     return output
 
 def get_period_group(atom):
+    """
+    Get the periodic table period and group for a given atom.
+    (Supports elements up to Argon; others return -1.)
+    """
     atomic_number = atom.GetAtomicNum()
     periods = {1: 1, 2: 1, 3: 1, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 2, 10: 2,
                11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3}
@@ -33,6 +56,10 @@ def get_period_group(atom):
 
 
 def one_of_k_encoding(x, allowable_set):
+    """
+    Return a one-hot encoding of an input value given an allowable set.
+    Raises an error if the input is not in the set.
+    """
     if x not in allowable_set:
         raise Exception("input {0} not in allowable set{1}:".format(x, allowable_set))
     return [x == s for s in allowable_set]
@@ -44,102 +71,39 @@ def one_of_k_encoding_unk(x, allowable_set):
     return [x == s for s in allowable_set]
 
 def calc_atom_features(atom):
+    """ Currently encodes atom type among ['C', 'N', 'O', 'F', 'P', 'S', 'Cl', 'Br'] """
     atom_symbol = [ 'C',  'N',  'O',  'F',  'P',  'S', 'Cl', 'Br']
-    # atom_degree = [ 0, 1, 2, 3, 4, 5, 6 ]
-    # hybrid_type = [ Chem.rdchem.HybridizationType.SP,    Chem.rdchem.HybridizationType.SP2,
-    #                 Chem.rdchem.HybridizationType.SP3,   Chem.rdchem.HybridizationType.SP3D,
-    #                 Chem.rdchem.HybridizationType.SP3D2, 'other'] 
-
     period, group = get_period_group(atom)
-
-    results = one_of_k_encoding_unk(atom.GetSymbol(), atom_symbol)        \
-            # + one_of_k_encoding(atom.GetDegree(), atom_degree)            \
-            # + [atom.GetFormalCharge(), atom.GetNumRadicalElectrons()]     \
-            # + one_of_k_encoding_unk(atom.GetHybridization(), hybrid_type) \
-            # + [atom.GetIsAromatic()] \
-            # + [period, group] 
-
-    
-                                        
+    results = one_of_k_encoding_unk(atom.GetSymbol(), atom_symbol)                              
     return np.array(results)
 
-def print_atom_features(ligand_dict):
-    for idx, fea in enumerate(ligand_dict['feature_atoms']):
-        atom_symbol = fea[0:8]
-        atom_degree = fea[8:15]
-        formal_charge = fea[15]
-        num_radical_electrons = fea[16]
-        hybrid_type = fea[17:23]
-        is_aromatic = fea[23]
-        peroid = fea[24]
-        group = fea[25]
-
-        atom_symbol_str = "Is C: " + ("Yes" if atom_symbol[0] else "Not") + "\n"
-        atom_symbol_str += "Is N: " + ("Yes" if atom_symbol[1] else "Not") + "\n"
-        atom_symbol_str += "Is O: " + ("Yes" if atom_symbol[2] else "Not") + "\n"
-        atom_symbol_str += "Is F: " + ("Yes" if atom_symbol[3] else "Not") + "\n"
-        atom_symbol_str += "Is P: " + ("Yes" if atom_symbol[4] else "Not") + "\n"
-        atom_symbol_str += "Is S: " + ("Yes" if atom_symbol[5] else "Not") + "\n"
-        atom_symbol_str += "Is Cl: " + ("Yes" if atom_symbol[6] else "Not") + "\n"
-        atom_symbol_str += "Is Br: " + ("Yes" if atom_symbol[7] else "Not") + "\n"
-
-        degree_str = "Degree: " + str(np.argmax(atom_degree)) + "\n" if 1 in atom_degree else "Degree: Unknown\n"
-        formal_charge_str = "FormalCharge: " + str(formal_charge) + "\n"
-        num_radical_electrons_str = "NumRadicalElectrons: " + str(num_radical_electrons) + "\n"
-
-        hybrid_type_str = "Is SP: " + ("Yes" if hybrid_type[0] else "Not") + "\n"
-        hybrid_type_str += "Is SP2: " + ("Yes" if hybrid_type[1] else "Not") + "\n"
-        hybrid_type_str += "Is SP3: " + ("Yes" if hybrid_type[2] else "Not") + "\n"
-        hybrid_type_str += "Is SP3D: " + ("Yes" if hybrid_type[3] else "Not") + "\n"
-        hybrid_type_str += "Is SP3D2: " + ("Yes" if hybrid_type[4] else "Not") + "\n"
-        hybrid_type_str += "Is Other: " + ("Yes" if hybrid_type[5] else "Not") + "\n"
-
-        aromatic_str = "Is Aromatic: " + ("Yes" if is_aromatic else "Not") + "\n"
-        peroid_str = "Period: " + str(peroid) + "\n"
-        group_str = "Group: " + str(group) + "\n"
-
-        print(f"Atom id {idx}:\n" + atom_symbol_str + degree_str + formal_charge_str + num_radical_electrons_str +
-              hybrid_type_str + aromatic_str + peroid_str + group_str)
-
-def print_bond_features(ligand_dict):
-    bond_indexs = ligand_dict['bond_index']
-    for idx, fea in enumerate(ligand_dict['feature_bonds']):
-
-        atom_bonded_str = "Atom Bonded: " + str(bond_indexs[0][idx].item()) + " and " + str(bond_indexs[1][idx].item()) + "\n"
-
-        single_bond = fea[0]
-        double_bond = fea[1]
-        triple_bond = fea[2]
-        aromatic_bond = fea[3]
-        conjugated_bond = fea[4]
-        in_ring_bond = fea[5]
-        non_cov_in_4_A = fea[6]
-
-        single_bond_str = "Is Single: " + ("Yes" if single_bond else "Not") + "\n"
-        double_bond_str = "Is Double: " + ("Yes" if double_bond else "Not") + "\n"
-        triple_bond_str = "Is Triple: " + ("Yes" if triple_bond else "Not") + "\n"
-        aromatic_bond_str = "Is Aromatic: " + ("Yes" if aromatic_bond else "Not") + "\n"
-        conjugated_bond_str = "Is Conjugated: " + ("Yes" if conjugated_bond else "Not") + "\n"
-        in_ring_bond_str = "Is InRing: " + ("Yes" if in_ring_bond else "Not") + "\n"
-        special_bond_str = "Is non_cov_in_4_A: " + ("Yes" if non_cov_in_4_A else "Not") + "\n"
-
-        print(f"Bond id {idx}:\n" + atom_bonded_str + single_bond_str + double_bond_str + triple_bond_str + aromatic_bond_str +
-              conjugated_bond_str + in_ring_bond_str + special_bond_str)
-
 def calc_bond_features(bond):
+    """
+    Compute bond type features as a binary vector:
+    [is_single, is_double, is_triple, is_aromatic, is_special]
+    """
     bt = bond.GetBondType()
     bond_feats = [
            bt == Chem.rdchem.BondType.SINGLE, 
            bt == Chem.rdchem.BondType.DOUBLE,
            bt == Chem.rdchem.BondType.TRIPLE, 
            bt == Chem.rdchem.BondType.AROMATIC,
-        #    bond.GetIsConjugated(),
-        #    bond.IsInRing(),
              0]
-
     return np.array(bond_feats).astype(int)
 
-def parse_drug3d_mol(mol, diffu_idx, name):
+def parse_drug3d_mol(mol, diffu_idx, name, cutoff=5.):
+    """
+    Parse an RDKit Mol object into atom, bond, and geometric features.
+
+    Args:
+        mol (Chem.Mol): RDKit molecule object.
+        diffu_idx (str): Semicolon-separated indices of atoms involved in diffusion.
+        name (str): Molecule identifier.
+        cutoff (float): Pocket atom distance cutoff threshold
+
+    Returns:
+        dict: Contains all features required for PyTorch Geometric graph construction.
+    """
     num_bonds = mol.GetNumBonds()
     num_atoms = mol.GetNumAtoms()
     feature_atoms = np.zeros((num_atoms, 8))
@@ -154,7 +118,8 @@ def parse_drug3d_mol(mol, diffu_idx, name):
         ele = atom.GetAtomicNum()
         pos_list.append(list(pos))
         ele_list.append(ele)
-
+        
+    # Sanitize molecule to ensure chemical validity
     try:
         Chem.SanitizeMol(mol)
     except:
@@ -165,23 +130,8 @@ def parse_drug3d_mol(mol, diffu_idx, name):
     for i in range(num_atoms):
         atom = mol.GetAtomWithIdx(i)
         feature_atoms[i] = calc_atom_features(atom)
-    # chiral_arr    = np.zeros([num_atoms, 3]) 
-    # chiralcenters = Chem.FindMolChiralCenters(mol, force=True, includeUnassigned=True, useLegacyImplementation=False)
-    # for (i, rs) in chiralcenters:
-    #     if rs == 'R':
-    #         chiral_arr[i, 0] =1 
-    #     elif rs == 'S':
-    #         chiral_arr[i, 1] =1 
-    #     else:
-    #         chiral_arr[i, 2] =1 
-    # feature_atoms = np.concatenate([feature_atoms, chiral_arr], axis=1)
-
-
     dist_matrix = squareform(pdist(positions))
-
-    # Define the cutoff for interaction (4 Å)
-    cutoff = 5.0
-
+    
     # Get existing bonds and initialize graph edges and types
     existing_bonds = set()
     row, col, bond_type = [], [], []
@@ -190,7 +140,8 @@ def parse_drug3d_mol(mol, diffu_idx, name):
     num_diff_bonds = 0
     indices_list = list(map(int, diffu_idx.split(';')))
     max_pocket_atom_id = max(indices_list)
-
+    
+    # Build edge list for existing bonds
     for idx, bond in enumerate(mol.GetBonds()):
         start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
         existing_bonds.add((start, end))
@@ -212,7 +163,8 @@ def parse_drug3d_mol(mol, diffu_idx, name):
             diff_bond_features.append(bond_feats)
             diff_row.extend([start, end])
             diff_col.extend([end, start])
-
+            
+    # Assign pocket vs. non-pocket atoms
     pocket_or_not_list = np.zeros([num_atoms]) 
 
     # Check for non-bonded interactions within cutoff and add them
@@ -240,7 +192,7 @@ def parse_drug3d_mol(mol, diffu_idx, name):
     bond_type = bond_type[perm]
     bond_feats_all = bond_feats_all[perm]
     
-
+    # Prepare diffusion-specific features
     for i, atom in enumerate(mol.GetAtoms()):
         if i in indices_list:
             diff_element.append(atom.GetAtomicNum())
@@ -251,12 +203,10 @@ def parse_drug3d_mol(mol, diffu_idx, name):
     diff_bond_index = np.array([diff_row, diff_col],dtype=np.int64)
     diff_bond_features = np.array(diff_bond_features, dtype=np.int64)
 
-
     perm = (diff_bond_index[0] * num_atoms + diff_bond_index[1]).argsort() 
     diff_bond_index = diff_bond_index[:, perm]
     diff_bond_type = diff_bond_type[perm]
     diff_bond_features = diff_bond_features[perm]
-
 
     for index, pairs in enumerate(bond_index.T):
         if pairs[0] in indices_list or pairs[1] in indices_list:
@@ -287,7 +237,10 @@ def parse_drug3d_mol(mol, diffu_idx, name):
     return data
 
 class Drug3DData(Data):
-
+    """
+    PyTorch Geometric Data subclass for 3D molecule graphs.
+    Supports LMDB serialization and custom indexing logic.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -299,8 +252,6 @@ class Drug3DData(Data):
             for key, item in ligand_dict.items():
                 instance[key] = item
             instance['orig_keys'] = list(ligand_dict.keys())
-
-        # instance['nbh_list'] = {i.item():[j.item() for k, j in enumerate(instance.ligand_bond_index[1]) if instance.ligand_bond_index[0, k].item() == i] for i in instance.ligand_bond_index[0]}
         return instance
 
     def __inc__(self, key, value, *args, **kwargs):
