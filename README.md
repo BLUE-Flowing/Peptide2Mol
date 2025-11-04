@@ -9,23 +9,21 @@
   </b> Overview of the Peptide2Mol diffusion-based framework.
 </p>
 ---
-
 ## Table of Contents
-1. [Dataset](#dataset)
-2. [Setup Environment](#setup-environment)
+1. [Setup Environment](#setup-environment)
+2. [Dataset](#dataset)
 3. [Running Peptide2Mol](#running-peptide2mol)
 4. [Retraining Peptide2Mol](#retraining-peptide2mol)
 5. [License](#license)
-
 ---
 
 ## Dataset
 
-To train the main Peptide2Mol model, download the original data from google drive:
+To train the main Peptide2Mol model, please download the original data from google drive:
 [Download the dataset (Drive folder)](https://drive.google.com/drive/folders/1I2uyFPSfeDS1ZXzKxw4ZQ5cu74sQGtSD?hl=zh)
 
 After downloading, you should have:
-- dataset.tar.gz # compressed dataset containing SDF files without hydrogens
+- dataset.tar.gz # compressed dataset containing structure files
 - final_csv_goodH.csv # CSV file containing metadata and diffusion indices
 
 Then extract the dataset:
@@ -33,11 +31,13 @@ Then extract the dataset:
 mkdir -p dataset
 tar -xzvf dataset.tar.gz -C dataset
 ```
-
-- If you have raw data in the `raw_data` folder, convert it into the required `.pt` format by running:  
-  ```bash
-  python ./notebooks/deal_with_mol_5A.py ./raw_data/final_csv_goodH.csv ./raw_data/sdf ./data_all5.pt
-  ```
+After downloading and extracting the dataset into the `dataset/` folder, run the preprocessing script to convert the SDF files into PyTorch `.pt` files for model training:
+```bash
+python ./notebooks/deal_with_mol_5A.py \
+    ./dataset/final_csv_goodH.csv \
+    ./dataset/sdf_noH \
+    ./dataset/data.pt
+```
 
 ---
 
