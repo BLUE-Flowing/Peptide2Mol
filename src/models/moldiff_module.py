@@ -25,7 +25,6 @@ class MolLitModule(LightningModule):
         super().__init__()
 
         self.save_hyperparameters(logger=False)
-
         self.nn = self.hparams.net
 
         self.losses = {}

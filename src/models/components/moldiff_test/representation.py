@@ -36,7 +36,6 @@ class MolDiff(Module):
         self.num_node_types = kwargs['input_node_dim']
         self.num_edge_types = kwargs['input_edge_dim']
         self.bond_len_loss = kwargs['bond_len_loss']
-
         # # define beta and alpha
         self.define_betas_alphas(kwargs['diff'])
 

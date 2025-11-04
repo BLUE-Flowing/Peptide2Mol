@@ -1,0 +1,2 @@
+name,total_loss,loss_pos,loss_node,loss_edge,batch_size,epoch,is_extra_training
+7kmh_antigen_CDRL1,0.000278,0.000103,0.000117,0.000059,1,0,False

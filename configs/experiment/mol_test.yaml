@@ -14,12 +14,12 @@ defaults:
 
 tags: ["kaggle", "tgt"]
 
-task_name: train_Moldiff_test
+task_name: eval_mol_test
 
 data:
   batch_size: 8
   infer_batch_size: 8
-  data_seed: 0
+  data_seed: 2025
 
 trainer:
   inference_mode: true

@@ -45,19 +45,19 @@ def one_of_k_encoding_unk(x, allowable_set):
 
 def calc_atom_features(atom):
     atom_symbol = [ 'C',  'N',  'O',  'F',  'P',  'S', 'Cl', 'Br']
-    atom_degree = [ 0, 1, 2, 3, 4, 5, 6 ]
-    hybrid_type = [ Chem.rdchem.HybridizationType.SP,    Chem.rdchem.HybridizationType.SP2,
-                    Chem.rdchem.HybridizationType.SP3,   Chem.rdchem.HybridizationType.SP3D,
-                    Chem.rdchem.HybridizationType.SP3D2, 'other'] 
+    # atom_degree = [ 0, 1, 2, 3, 4, 5, 6 ]
+    # hybrid_type = [ Chem.rdchem.HybridizationType.SP,    Chem.rdchem.HybridizationType.SP2,
+    #                 Chem.rdchem.HybridizationType.SP3,   Chem.rdchem.HybridizationType.SP3D,
+    #                 Chem.rdchem.HybridizationType.SP3D2, 'other'] 
 
     period, group = get_period_group(atom)
 
     results = one_of_k_encoding_unk(atom.GetSymbol(), atom_symbol)        \
-            + one_of_k_encoding(atom.GetDegree(), atom_degree)            \
-            + [atom.GetFormalCharge(), atom.GetNumRadicalElectrons()]     \
-            + one_of_k_encoding_unk(atom.GetHybridization(), hybrid_type) \
-            + [atom.GetIsAromatic()] \
-            + [period, group] 
+            # + one_of_k_encoding(atom.GetDegree(), atom_degree)            \
+            # + [atom.GetFormalCharge(), atom.GetNumRadicalElectrons()]     \
+            # + one_of_k_encoding_unk(atom.GetHybridization(), hybrid_type) \
+            # + [atom.GetIsAromatic()] \
+            # + [period, group] 
 
     
                                         
@@ -133,15 +133,16 @@ def calc_bond_features(bond):
            bt == Chem.rdchem.BondType.DOUBLE,
            bt == Chem.rdchem.BondType.TRIPLE, 
            bt == Chem.rdchem.BondType.AROMATIC,
-           bond.GetIsConjugated(),
-           bond.IsInRing(), 0]
+        #    bond.GetIsConjugated(),
+        #    bond.IsInRing(), 
+           0]
 
     return np.array(bond_feats).astype(int)
 
 def parse_drug3d_mol(mol, diffu_idx, name):
     num_bonds = mol.GetNumBonds()
     num_atoms = mol.GetNumAtoms()
-    feature_atoms = np.zeros((num_atoms, 26))
+    feature_atoms = np.zeros((num_atoms, 8)) # original: 26
     bond_feats_all = []
     conf = mol.GetConformer()
     positions = np.array([list(conf.GetAtomPosition(i)) for i in range(num_atoms)])
@@ -164,16 +165,16 @@ def parse_drug3d_mol(mol, diffu_idx, name):
     for i in range(num_atoms):
         atom = mol.GetAtomWithIdx(i)
         feature_atoms[i] = calc_atom_features(atom)
-    chiral_arr    = np.zeros([num_atoms, 3]) 
-    chiralcenters = Chem.FindMolChiralCenters(mol, force=True, includeUnassigned=True, useLegacyImplementation=False)
-    for (i, rs) in chiralcenters:
-        if rs == 'R':
-            chiral_arr[i, 0] =1 
-        elif rs == 'S':
-            chiral_arr[i, 1] =1 
-        else:
-            chiral_arr[i, 2] =1 
-    feature_atoms = np.concatenate([feature_atoms, chiral_arr], axis=1)
+    # chiral_arr    = np.zeros([num_atoms, 3]) 
+    # chiralcenters = Chem.FindMolChiralCenters(mol, force=True, includeUnassigned=True, useLegacyImplementation=False)
+    # for (i, rs) in chiralcenters:
+    #     if rs == 'R':
+    #         chiral_arr[i, 0] =1 
+    #     elif rs == 'S':
+    #         chiral_arr[i, 1] =1 
+    #     else:
+    #         chiral_arr[i, 2] =1 
+    # feature_atoms = np.concatenate([feature_atoms, chiral_arr], axis=1)
 
 
     dist_matrix = squareform(pdist(positions))
@@ -232,8 +233,10 @@ def parse_drug3d_mol(mol, diffu_idx, name):
                     row.extend([i, j])
                     col.extend([j, i])
                     bond_type.extend([5, 5])
-                    bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
-                    bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
+                    # bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
+                    # bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
+                    bond_feats_all.append([0, 0, 0, 0, 1])
+                    bond_feats_all.append([0, 0, 0, 0, 1])
                     num_bonds += 1  
     # Prepare final arrays
     bond_index = np.array([row, col], dtype=np.int64)
@@ -342,7 +345,7 @@ def pdb_to_sdf(pdb_file, sdf_file):
 def main():
     pdb_path = sys.argv[1]
     for _, line in enumerate(os.listdir(pdb_path)):
-        if line.endswith('.pdb') and 'poc' in line:
+        if line.endswith('.pdb') and 'antigen' in line:
             processed_path = f'{pdb_path}/{line[:-4]}.pt'
             db = lmdb.open(
                         processed_path,

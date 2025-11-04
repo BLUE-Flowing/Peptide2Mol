@@ -150,6 +150,19 @@ configs/local/default.yaml
 /data/
 /logs/
 .env
+/logs_CDR/
+/logs_retrain/
+/ckpts/
+/partial_draw/
+/sample_0811/
+/split_by_guidance/
+/eval/
+/data/
+/CDR_filterd1_regen/
+/CDR_filtered_use/
+/CDR_filtered/coords/
+/before/
+/antibody_fragments/
 
 # Aim logging
 .aim

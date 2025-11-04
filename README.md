@@ -231,7 +231,7 @@ To retrain the guidance model, use this configuration:
 python src/train.py \
   experiment=comp_test \
   ++paths.data_dir=$PWD \
-  +data.lmdb_fn=data_only_peptide5.pt \
+  +data.lmdb_fn=data_only_peptide.pt \
   +data.num_train=39000 \
   ++data.batch_size=16 \
   ++paths.log_dir=./logs_guidance \
