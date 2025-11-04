@@ -97,18 +97,19 @@ mkdir -p ckpts
 mv PMT_major.ckpt ckpts/
 ```
 
-
 ## Usage
 
 ### Step 1: Prepare Protein Inputs
 
-Prepare a `.pdb` file containing residues within 6 Å of the peptide ligand. For example, in PyMOL, you can use:
+To construct the receptor pocket model, extract residues located within 6 Å of the peptide ligand from the protein complex structure.
+This can be achieved in PyMOL using the following commands:
 
 ```bash
 select sel_poc, br. (sele around 6)
+save xxx_poc.pdb, sel_poc # xxx can be set as PDB id at inference
 ```
 
-Save the selection as `xxx_poc.pdb` in a folder such as `./poc_test/`.
+The resulting file xxx_poc.pdb should contain all residues within a 6 Å radius of the peptide and can be stored in a designated directory (e.g., ./poc_test/) for subsequent modeling or analysis.
 
 ## Step 2: Generate `.pt` Files
 
