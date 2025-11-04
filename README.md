@@ -83,7 +83,7 @@ python ./notebooks/deal_with_mol_5A.py \
 ```
 Then, the processed dataset file data.pt will be saved in the dataset/ directory.
 If you plan to retrain the model, make sure the path to data.pt is correct.
-
+> **Note:** Preprocessing may take up to three hours.
 
 ## Training Weights
 
