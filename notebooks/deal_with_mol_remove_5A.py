@@ -46,86 +46,8 @@ def one_of_k_encoding_unk(x, allowable_set):
 
 def calc_atom_features(atom):
     atom_symbol = [ 'C',  'N',  'O',  'F',  'P',  'S', 'Cl', 'Br']
-    atom_degree = [ 0, 1, 2, 3, 4, 5, 6 ]
-    hybrid_type = [ Chem.rdchem.HybridizationType.SP,    Chem.rdchem.HybridizationType.SP2,
-                    Chem.rdchem.HybridizationType.SP3,   Chem.rdchem.HybridizationType.SP3D,
-                    Chem.rdchem.HybridizationType.SP3D2, 'other'] 
-
-    period, group = get_period_group(atom)
-
-    results = one_of_k_encoding_unk(atom.GetSymbol(), atom_symbol)        \
-            + one_of_k_encoding(atom.GetDegree(), atom_degree)            \
-            + [atom.GetFormalCharge(), atom.GetNumRadicalElectrons()]     \
-            + one_of_k_encoding_unk(atom.GetHybridization(), hybrid_type) \
-            + [atom.GetIsAromatic()] \
-            + [period, group] 
-
-    
-                                        
+    results = one_of_k_encoding_unk(atom.GetSymbol(), atom_symbol)      
     return np.array(results)
-
-def print_atom_features(ligand_dict):
-    for idx, fea in enumerate(ligand_dict['feature_atoms']):
-        atom_symbol = fea[0:8]
-        atom_degree = fea[8:15]
-        formal_charge = fea[15]
-        num_radical_electrons = fea[16]
-        hybrid_type = fea[17:23]
-        is_aromatic = fea[23]
-        peroid = fea[24]
-        group = fea[25]
-
-        atom_symbol_str = "Is C: " + ("Yes" if atom_symbol[0] else "Not") + "\n"
-        atom_symbol_str += "Is N: " + ("Yes" if atom_symbol[1] else "Not") + "\n"
-        atom_symbol_str += "Is O: " + ("Yes" if atom_symbol[2] else "Not") + "\n"
-        atom_symbol_str += "Is F: " + ("Yes" if atom_symbol[3] else "Not") + "\n"
-        atom_symbol_str += "Is P: " + ("Yes" if atom_symbol[4] else "Not") + "\n"
-        atom_symbol_str += "Is S: " + ("Yes" if atom_symbol[5] else "Not") + "\n"
-        atom_symbol_str += "Is Cl: " + ("Yes" if atom_symbol[6] else "Not") + "\n"
-        atom_symbol_str += "Is Br: " + ("Yes" if atom_symbol[7] else "Not") + "\n"
-
-        degree_str = "Degree: " + str(np.argmax(atom_degree)) + "\n" if 1 in atom_degree else "Degree: Unknown\n"
-        formal_charge_str = "FormalCharge: " + str(formal_charge) + "\n"
-        num_radical_electrons_str = "NumRadicalElectrons: " + str(num_radical_electrons) + "\n"
-
-        hybrid_type_str = "Is SP: " + ("Yes" if hybrid_type[0] else "Not") + "\n"
-        hybrid_type_str += "Is SP2: " + ("Yes" if hybrid_type[1] else "Not") + "\n"
-        hybrid_type_str += "Is SP3: " + ("Yes" if hybrid_type[2] else "Not") + "\n"
-        hybrid_type_str += "Is SP3D: " + ("Yes" if hybrid_type[3] else "Not") + "\n"
-        hybrid_type_str += "Is SP3D2: " + ("Yes" if hybrid_type[4] else "Not") + "\n"
-        hybrid_type_str += "Is Other: " + ("Yes" if hybrid_type[5] else "Not") + "\n"
-
-        aromatic_str = "Is Aromatic: " + ("Yes" if is_aromatic else "Not") + "\n"
-        peroid_str = "Period: " + str(peroid) + "\n"
-        group_str = "Group: " + str(group) + "\n"
-
-        print(f"Atom id {idx}:\n" + atom_symbol_str + degree_str + formal_charge_str + num_radical_electrons_str +
-              hybrid_type_str + aromatic_str + peroid_str + group_str)
-
-def print_bond_features(ligand_dict):
-    bond_indexs = ligand_dict['bond_index']
-    for idx, fea in enumerate(ligand_dict['feature_bonds']):
-
-        atom_bonded_str = "Atom Bonded: " + str(bond_indexs[0][idx].item()) + " and " + str(bond_indexs[1][idx].item()) + "\n"
-
-        single_bond = fea[0]
-        double_bond = fea[1]
-        triple_bond = fea[2]
-        aromatic_bond = fea[3]
-        conjugated_bond = fea[4]
-        in_ring_bond = fea[5]
-        non_cov_in_4_A = fea[6]
-
-        single_bond_str = "Is Single: " + ("Yes" if single_bond else "Not") + "\n"
-        double_bond_str = "Is Double: " + ("Yes" if double_bond else "Not") + "\n"
-        triple_bond_str = "Is Triple: " + ("Yes" if triple_bond else "Not") + "\n"
-        aromatic_bond_str = "Is Aromatic: " + ("Yes" if aromatic_bond else "Not") + "\n"
-        conjugated_bond_str = "Is Conjugated: " + ("Yes" if conjugated_bond else "Not") + "\n"
-        in_ring_bond_str = "Is InRing: " + ("Yes" if in_ring_bond else "Not") + "\n"
-        special_bond_str = "Is non_cov_in_4_A: " + ("Yes" if non_cov_in_4_A else "Not") + "\n"
-
-        print(f"Bond id {idx}:\n" + atom_bonded_str + single_bond_str + double_bond_str + triple_bond_str + aromatic_bond_str +
-              conjugated_bond_str + in_ring_bond_str + special_bond_str)
 
 def calc_bond_features(bond):
     bt = bond.GetBondType()
@@ -134,9 +56,8 @@ def calc_bond_features(bond):
            bt == Chem.rdchem.BondType.DOUBLE,
            bt == Chem.rdchem.BondType.TRIPLE, 
            bt == Chem.rdchem.BondType.AROMATIC,
-           bond.GetIsConjugated(),
-           bond.IsInRing(), 0]
-
+           0
+    ]
     return np.array(bond_feats).astype(int)
 
 def safe_remove(inp_index, remove_indices_list):
@@ -150,7 +71,6 @@ def safe_remove(inp_index, remove_indices_list):
     Returns:
     int or None: The new index if inp_index is not removed, otherwise None.
     """
-
     # Check if inp_index is to be removed
     if inp_index in remove_indices_list:
         return None  # Indicate that inp_index has been removed
@@ -164,7 +84,7 @@ def safe_remove(inp_index, remove_indices_list):
     return new_index
 
 
-def parse_drug3d_mol(mol, diffu_idx, name, remove_idx):
+def parse_drug3d_mol(mol, diffu_idx, name, remove_idx, cutoff=5.):
     remove_indices_list = list(map(int, remove_idx.split(';')))
     num_bonds = mol.GetNumBonds()
     num_atoms = mol.GetNumAtoms()
@@ -189,28 +109,10 @@ def parse_drug3d_mol(mol, diffu_idx, name, remove_idx):
             except:
                 pass
     for i in range(num_atoms):
-        # print(i, remove_indices_list)
         if i not in remove_indices_list:
-            # print()
             atom = mol.GetAtomWithIdx(i)
             feature_atoms[safe_remove(i, remove_indices_list)] = calc_atom_features(atom)
-    chiral_arr    = np.zeros([num_atoms-len(remove_indices_list), 3]) 
-    chiralcenters = Chem.FindMolChiralCenters(mol, force=True, includeUnassigned=True, useLegacyImplementation=False)
-    for (i, rs) in chiralcenters:
-        if i not in remove_indices_list:
-            if rs == 'R':
-                chiral_arr[safe_remove(i, remove_indices_list), 0] =1 
-            elif rs == 'S':
-                chiral_arr[safe_remove(i, remove_indices_list), 1] =1 
-            else:
-                chiral_arr[safe_remove(i, remove_indices_list), 2] =1 
-    feature_atoms = np.concatenate([feature_atoms, chiral_arr], axis=1)
-
-
     dist_matrix = squareform(pdist(positions))
-
-    # Define the cutoff for interaction (4 Å)
-    cutoff = 5.0
 
     # Get existing bonds and initialize graph edges and types
     existing_bonds = set()
