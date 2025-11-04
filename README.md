@@ -169,10 +169,22 @@ These structures are sourced from the LiGAN 10-testcase benchmark [DOI: https://
 
 #### De Novo Generation:
 
+To perform de novo generation, run the following command:
 ```bash
 DATA_DIR=./demo/example MODEL=Moldiff_test LMDB_FILE=1bvr_poc.pt SAMPLE_OUTPUT_DIR=./output/1bvr_poc bash scripts/inference.sh
 ```
-The generated results will be displayed in the `./output/1bvr_poc_SDF` folder, containing 100 generated small molecules and the original pocket structures.
+**Key Parameters:**
+  - DATA_DIR: directory containing the pre-generated .pt files
+  - MODEL: specifies the model to use (Moldiff_test)
+  - LMDB_FILE: the specific .pt file for the protein complex (1bvr_poc.pt)
+  - SAMPLE_OUTPUT_DIR: directory where the generated results will be saved
+  - 
+The generated results will be stored in ./output/1bvr_poc_SDF, including:
+
+ - 100 generated small molecules
+ - Original pocket structures corresponding to the protein target
+
+This allows users to quickly verify the **de novo generation workflow**.
 
 #### Partial generation:
 
