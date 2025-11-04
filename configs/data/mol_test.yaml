@@ -5,6 +5,6 @@ infer_batch_size: 1
 num_workers: 0
 pin_memory: True
 reduction_factor: 1
-lmdb_fn: data_only_peptide.pt # add lmdb filename  #info yijia added
-num_train: 39000                       #info yijia added
-data_seed: 0                            #info yijia added
+lmdb_fn: data_only_peptide.pt # add lmdb filename  
+num_train: 39000                       
+data_seed: 0                            
