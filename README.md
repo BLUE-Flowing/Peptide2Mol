@@ -161,31 +161,23 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
 
 #### Step 3: Demo Generation
 
-To enable reviewers to quickly verify the software, we provide a minimal test dataset. This dataset includes a small set of example protein–peptide complexes that can be used to run the full pipeline end-to-end. Specifically, we include two protein complex structures, 1bvr and 4bnw, sourced from the LiGAN 10-testcase benchmark [DOI: https://doi.org/10.1039/D1SC05976A]. 
-The corresponding .pt files have been pre-generated following the procedure described above. In this dataset, 1bvr is intended for de novo protein generation, while 4bnw is used for partial generation.
+To facilitate **quick verification** of the software by reviewers, we provide a minimal test dataset. This dataset contains a small set of example protein–peptide complexes that can be used to run the full pipeline end-to-end. Specifically, the dataset includes two protein complex structures:
+  - **1bvr** – suitable for de novo protein generation
+  - **4bnw** – suitable for partial (fragment-based) generation
+
+These structures are sourced from the LiGAN 10-testcase benchmark [DOI: https://doi.org/10.1039/D1SC05976A]. The corresponding .pt files have been pre-generated following the procedure described in **Step 2: Generate .pt Files**. Users can directly use these preprocessed files to test the pipeline without additional preprocessing.
 
 #### De Novo Generation:
 
 ```bash
-DATA_DIR=./demo/example LMDB_FILE=1bvr_poc.pt SAMPLE_OUTPUT_DIR=./output/1bvr_poc bash scripts/inference.sh
+DATA_DIR=./demo/example MODEL=Moldiff_test LMDB_FILE=1bvr_poc.pt SAMPLE_OUTPUT_DIR=./output/1bvr_poc bash scripts/inference.sh
 ```
-The generated results will be displayed in the *./output/1bvr_poc_SDF* folder, containing 100 generated small molecules and the original pocket structures.
+The generated results will be displayed in the `./output/1bvr_poc_SDF` folder, containing 100 generated small molecules and the original pocket structures.
 
 #### Partial generation:
 
 ```bash
-python src/eval.py experiment=mol_test \
-  ckpt_path=$PWD/ckpts/PMT_major.ckpt \
-  ++paths.data_dir=$PWD/poc_test/ \
-  +data.lmdb_fn=PBmol_2qtg.pt \
-  data=mol_test_true \
-  model=Moldiff_test_partial \
-  data.infer_batch_size=1 \
-  trainer.devices=1 \
-  ++paths.log_dir=./logs_1223_test \
-  ++model.net.sample.log_dir=$PWD/sample_test \
-  ++model.net.sample.pdb_dir=$PWD/poc_test \
-  ++model.net.sample.batch_size=1
+DATA_DIR=./demo/example MODEL=Moldiff_test_partial LMDB_FILE=4bnw_partial_poc.pt SAMPLE_OUTPUT_DIR=./output/4bnw_partial_poc bash scripts/inference.sh
 ```
 
 ### Fix Molecules with Pocket2Mol
