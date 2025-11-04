@@ -112,7 +112,7 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
 
 ### Step 3: Inference
 
-#### Without Guidance:
+#### De Novo Generation:
 
 ```bash
 python src/eval.py experiment=mol_test \
@@ -129,7 +129,7 @@ python src/eval.py experiment=mol_test \
   ++model.net.sample.batch_size=1
 ```
 
-#### Partial generation without Guidance:
+#### Partial generation:
 
 ```bash
 python src/eval.py experiment=mol_test \
@@ -145,43 +145,6 @@ python src/eval.py experiment=mol_test \
   ++model.net.sample.pdb_dir=$PWD/poc_test \
   ++model.net.sample.batch_size=1
 ```
-
-#### With Guidance:
-
-```bash
-python src/eval.py experiment=mol_test_gui \
-  ckpt_path=$PWD/ckpts/PMT_major.ckpt \
-  ++paths.data_dir=$PWD/poc_test/ \
-  +data.lmdb_fn=5wbj_MTOR_poc.pt \
-  data=mol_test_true \
-  model=Moldiff_gui_comp \
-  data.infer_batch_size=2 \
-  trainer.devices=1 \
-  ++paths.log_dir=./logs_1224_test \
-  ++model.net.sample.log_dir=$PWD/sample_test \
-  ++model.net.sample.pdb_dir=$PWD/poc_test \
-  ++model.net.sample.batch_size=1 \
-  ++model.net.sample.gui_dir=$PWD/ckpts/PMT_comparison.ckpt
-```
-
-#### Partial generation with Guidance:
-
-```bash
-python src/eval.py experiment=mol_test_gui \
-  ckpt_path=$PWD/ckpts/PMT_major.ckpt \
-  ++paths.data_dir=$PWD/poc_test/ \
-  +data.lmdb_fn=PBmol_2qtg.pt \
-  data=mol_test_true \
-  model=Moldiff_gui_comp_partial \
-  data.infer_batch_size=1 \
-  trainer.devices=1 \
-  ++paths.log_dir=./logs_1223_test \
-  ++model.net.sample.log_dir=$PWD/sample_test \
-  ++model.net.sample.pdb_dir=$PWD/poc_test \
-  ++model.net.sample.batch_size=1
-  ++model.net.sample.gui_dir=$PWD/ckpts/PMT_comparison.ckpt
-```
-
 
 ### Step 4: Fix Molecules with Pocket2Mol
 
