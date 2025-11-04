@@ -1,7 +1,0 @@
-_target_: src.data.mol_datamodule_test.MolTestDataModule
-data_dir: ${paths.data_dir}
-batch_size: 1
-infer_batch_size: 1
-num_workers: 0
-pin_memory: True
-reduction_factor: 1
