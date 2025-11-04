@@ -10,6 +10,8 @@ from rdkit import Chem
 from tqdm import tqdm
 from torch_geometric.data import Data
 from scipy.spatial.distance import pdist, squareform
+from rdkit import Chem
+from rdkit.Chem import AllChem
 
 def torchify_dict(data):
     output = {}
@@ -45,86 +47,9 @@ def one_of_k_encoding_unk(x, allowable_set):
 
 def calc_atom_features(atom):
     atom_symbol = [ 'C',  'N',  'O',  'F',  'P',  'S', 'Cl', 'Br']
-    # atom_degree = [ 0, 1, 2, 3, 4, 5, 6 ]
-    # hybrid_type = [ Chem.rdchem.HybridizationType.SP,    Chem.rdchem.HybridizationType.SP2,
-    #                 Chem.rdchem.HybridizationType.SP3,   Chem.rdchem.HybridizationType.SP3D,
-    #                 Chem.rdchem.HybridizationType.SP3D2, 'other'] 
-
     period, group = get_period_group(atom)
-
-    results = one_of_k_encoding_unk(atom.GetSymbol(), atom_symbol)        \
-            # + one_of_k_encoding(atom.GetDegree(), atom_degree)            \
-            # + [atom.GetFormalCharge(), atom.GetNumRadicalElectrons()]     \
-            # + one_of_k_encoding_unk(atom.GetHybridization(), hybrid_type) \
-            # + [atom.GetIsAromatic()] \
-            # + [period, group] 
-
-    
-                                        
+    results = one_of_k_encoding_unk(atom.GetSymbol(), atom_symbol)                 
     return np.array(results)
-
-def print_atom_features(ligand_dict):
-    for idx, fea in enumerate(ligand_dict['feature_atoms']):
-        atom_symbol = fea[0:8]
-        atom_degree = fea[8:15]
-        formal_charge = fea[15]
-        num_radical_electrons = fea[16]
-        hybrid_type = fea[17:23]
-        is_aromatic = fea[23]
-        peroid = fea[24]
-        group = fea[25]
-
-        atom_symbol_str = "Is C: " + ("Yes" if atom_symbol[0] else "Not") + "\n"
-        atom_symbol_str += "Is N: " + ("Yes" if atom_symbol[1] else "Not") + "\n"
-        atom_symbol_str += "Is O: " + ("Yes" if atom_symbol[2] else "Not") + "\n"
-        atom_symbol_str += "Is F: " + ("Yes" if atom_symbol[3] else "Not") + "\n"
-        atom_symbol_str += "Is P: " + ("Yes" if atom_symbol[4] else "Not") + "\n"
-        atom_symbol_str += "Is S: " + ("Yes" if atom_symbol[5] else "Not") + "\n"
-        atom_symbol_str += "Is Cl: " + ("Yes" if atom_symbol[6] else "Not") + "\n"
-        atom_symbol_str += "Is Br: " + ("Yes" if atom_symbol[7] else "Not") + "\n"
-
-        degree_str = "Degree: " + str(np.argmax(atom_degree)) + "\n" if 1 in atom_degree else "Degree: Unknown\n"
-        formal_charge_str = "FormalCharge: " + str(formal_charge) + "\n"
-        num_radical_electrons_str = "NumRadicalElectrons: " + str(num_radical_electrons) + "\n"
-
-        hybrid_type_str = "Is SP: " + ("Yes" if hybrid_type[0] else "Not") + "\n"
-        hybrid_type_str += "Is SP2: " + ("Yes" if hybrid_type[1] else "Not") + "\n"
-        hybrid_type_str += "Is SP3: " + ("Yes" if hybrid_type[2] else "Not") + "\n"
-        hybrid_type_str += "Is SP3D: " + ("Yes" if hybrid_type[3] else "Not") + "\n"
-        hybrid_type_str += "Is SP3D2: " + ("Yes" if hybrid_type[4] else "Not") + "\n"
-        hybrid_type_str += "Is Other: " + ("Yes" if hybrid_type[5] else "Not") + "\n"
-
-        aromatic_str = "Is Aromatic: " + ("Yes" if is_aromatic else "Not") + "\n"
-        peroid_str = "Period: " + str(peroid) + "\n"
-        group_str = "Group: " + str(group) + "\n"
-
-        print(f"Atom id {idx}:\n" + atom_symbol_str + degree_str + formal_charge_str + num_radical_electrons_str +
-              hybrid_type_str + aromatic_str + peroid_str + group_str)
-
-def print_bond_features(ligand_dict):
-    bond_indexs = ligand_dict['bond_index']
-    for idx, fea in enumerate(ligand_dict['feature_bonds']):
-
-        atom_bonded_str = "Atom Bonded: " + str(bond_indexs[0][idx].item()) + " and " + str(bond_indexs[1][idx].item()) + "\n"
-
-        single_bond = fea[0]
-        double_bond = fea[1]
-        triple_bond = fea[2]
-        aromatic_bond = fea[3]
-        conjugated_bond = fea[4]
-        in_ring_bond = fea[5]
-        non_cov_in_4_A = fea[6]
-
-        single_bond_str = "Is Single: " + ("Yes" if single_bond else "Not") + "\n"
-        double_bond_str = "Is Double: " + ("Yes" if double_bond else "Not") + "\n"
-        triple_bond_str = "Is Triple: " + ("Yes" if triple_bond else "Not") + "\n"
-        aromatic_bond_str = "Is Aromatic: " + ("Yes" if aromatic_bond else "Not") + "\n"
-        conjugated_bond_str = "Is Conjugated: " + ("Yes" if conjugated_bond else "Not") + "\n"
-        in_ring_bond_str = "Is InRing: " + ("Yes" if in_ring_bond else "Not") + "\n"
-        special_bond_str = "Is non_cov_in_4_A: " + ("Yes" if non_cov_in_4_A else "Not") + "\n"
-
-        print(f"Bond id {idx}:\n" + atom_bonded_str + single_bond_str + double_bond_str + triple_bond_str + aromatic_bond_str +
-              conjugated_bond_str + in_ring_bond_str + special_bond_str)
 
 def calc_bond_features(bond):
     bt = bond.GetBondType()
@@ -133,13 +58,10 @@ def calc_bond_features(bond):
            bt == Chem.rdchem.BondType.DOUBLE,
            bt == Chem.rdchem.BondType.TRIPLE, 
            bt == Chem.rdchem.BondType.AROMATIC,
-        #    bond.GetIsConjugated(),
-        #    bond.IsInRing(), 
            0]
-
     return np.array(bond_feats).astype(int)
 
-def parse_drug3d_mol(mol, diffu_idx, name):
+def parse_drug3d_mol(mol, diffu_idx, name, cutoff=5.):
     num_bonds = mol.GetNumBonds()
     num_atoms = mol.GetNumAtoms()
     feature_atoms = np.zeros((num_atoms, 8)) # original: 26
@@ -165,22 +87,8 @@ def parse_drug3d_mol(mol, diffu_idx, name):
     for i in range(num_atoms):
         atom = mol.GetAtomWithIdx(i)
         feature_atoms[i] = calc_atom_features(atom)
-    # chiral_arr    = np.zeros([num_atoms, 3]) 
-    # chiralcenters = Chem.FindMolChiralCenters(mol, force=True, includeUnassigned=True, useLegacyImplementation=False)
-    # for (i, rs) in chiralcenters:
-    #     if rs == 'R':
-    #         chiral_arr[i, 0] =1 
-    #     elif rs == 'S':
-    #         chiral_arr[i, 1] =1 
-    #     else:
-    #         chiral_arr[i, 2] =1 
-    # feature_atoms = np.concatenate([feature_atoms, chiral_arr], axis=1)
-
 
     dist_matrix = squareform(pdist(positions))
-
-    # Define the cutoff for interaction (4 Å)
-    cutoff = 5.0
 
     # Get existing bonds and initialize graph edges and types
     existing_bonds = set()
@@ -195,7 +103,6 @@ def parse_drug3d_mol(mol, diffu_idx, name):
         indices_list = []
         max_pocket_atom_id = -1
     
-
     for idx, bond in enumerate(mol.GetBonds()):
         start, end = bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()
         existing_bonds.add((start, end))
@@ -217,9 +124,7 @@ def parse_drug3d_mol(mol, diffu_idx, name):
             diff_bond_features.append(bond_feats)
             diff_row.extend([start, end])
             diff_col.extend([end, start])
-    # print(np.array(bond_type).shape,'bond_type')
-    # print(np.array(bond_feats_all).shape,'bond_feats_all')
-    # assert False
+
     pocket_or_not_list = np.zeros([num_atoms]) 
 
     # Check for non-bonded interactions within cutoff and add them
@@ -307,8 +212,6 @@ class Drug3DData(Data):
             for key, item in ligand_dict.items():
                 instance[key] = item
             instance['orig_keys'] = list(ligand_dict.keys())
-
-        # instance['nbh_list'] = {i.item():[j.item() for k, j in enumerate(instance.ligand_bond_index[1]) if instance.ligand_bond_index[0, k].item() == i] for i in instance.ligand_bond_index[0]}
         return instance
 
     def __inc__(self, key, value, *args, **kwargs):
@@ -322,8 +225,7 @@ class Drug3DData(Data):
             return super().__inc__(key, value, *args, **kwargs)
 
 
-from rdkit import Chem
-from rdkit.Chem import AllChem
+
 def pdb_to_sdf(pdb_file, sdf_file):
     # Read the PDB file
     with open(pdb_file, 'r') as pdb:
@@ -383,7 +285,7 @@ def main():
                     print('Skipping (%d) Num: %s' % (num_skipped, mol_id))
 
             db.close()
-    # print('Processed %d molecules' % (len(df_use) - num_skipped), 'Skipped %d molecules' % num_skipped)
+    print('Processed %d molecules' % (len(df_use) - num_skipped), 'Skipped %d molecules' % num_skipped)
 
 if __name__ == '__main__':
     main()
