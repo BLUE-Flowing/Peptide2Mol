@@ -283,31 +283,29 @@ def main():
             # mol info
             mol_id = line['filename']
             diffu_idx = line['diffu_idx']
+            try:
+                # load all confs of the mol
+                suppl = Chem.SDMolSupplier(os.path.join(sdf_path, mol_id))
+                mol = suppl[0]
+                # santinize the mol
+                Chem.SanitizeMol(mol)
+                mol = Chem.RemoveAllHs(mol)
+                ligand_dict = parse_drug3d_mol(mol, diffu_idx, mol_id)
+                ligand_dict = torchify_dict(ligand_dict)
+                data = Drug3DData.from_drug3d_dicts(ligand_dict)
 
-            if 'pep' in mol_id or 'cpep' in mol_id:
-                try:
-                    # load all confs of the mol
-                    suppl = Chem.SDMolSupplier(os.path.join(sdf_path, mol_id))
-                    mol = suppl[0]
-                    # santinize the mol
-                    Chem.SanitizeMol(mol)
-                    mol = Chem.RemoveAllHs(mol)
-                    ligand_dict = parse_drug3d_mol(mol, diffu_idx, mol_id)
-                    ligand_dict = torchify_dict(ligand_dict)
-                    data = Drug3DData.from_drug3d_dicts(ligand_dict)
-
-                    data.mol_id = mol_id+str(_)
-                    
-                    txn.put(
-                        key = str(mol_id+str(_)).encode(),
-                        value = pickle.dumps(data)
-                    )
-                except:
-                    traceback.print_exc()
-                    num_skipped += 1
-                    print('Skipping (%d) Num: %s' % (num_skipped, mol_id))
-                    # assert False
-                    continue
+                data.mol_id = mol_id+str(_)
+                
+                txn.put(
+                    key = str(mol_id+str(_)).encode(),
+                    value = pickle.dumps(data)
+                )
+            except:
+                traceback.print_exc()
+                num_skipped += 1
+                print('Skipping (%d) Num: %s' % (num_skipped, mol_id))
+                # assert False
+                continue
     db.close()
     print('Processed %d molecules' % (len(df_use) - num_skipped), 'Skipped %d molecules' % num_skipped)
 
