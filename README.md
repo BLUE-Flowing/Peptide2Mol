@@ -161,21 +161,14 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
 
 #### Step 3: Demo Generation
 
+To facilitate quick verification of the software by reviewers, a minimal testset is provided.  
+This dataset contains a small example protein-peptide complex that can be used to run the full pipeline end-to-end.
+We used two protein complex files, 1bvr and 4bnw, from the LiGAN 10-testcase. We had already generated the pt files in advance according to the previously described process. 1bvr can be used for de novo protein generation, while 4bnw is used for fragment generation.
+
 #### De Novo Generation:
 
 ```bash
-python src/eval.py experiment=mol_test \
-  ckpt_path=$PWD/ckpts/PMT_major.ckpt \
-  ++paths.data_dir=$PWD/poc_test/ \
-  +data.lmdb_fn=5wbj_MTOR_poc.pt \
-  data=mol_test_true \
-  model=Moldiff_test \
-  data.infer_batch_size=2 \
-  trainer.devices=1 \
-  ++paths.log_dir=./logs_1223_test \
-  ++model.net.sample.log_dir=$PWD/sample_test \
-  ++model.net.sample.pdb_dir=$PWD/poc_test \
-  ++model.net.sample.batch_size=1
+
 ```
 
 #### Partial generation:
