@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <b>Figure 1.</b> Overview of the Peptide2Mol diffusion-based framework.
+  </b> Overview of the Peptide2Mol diffusion-based framework.
 </p>
 ---
 
