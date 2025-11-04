@@ -21,7 +21,18 @@
 
 ## Dataset
 
-To train the main Peptide2Mol model, download either the processed or original data from Zenodo.
+To train the main Peptide2Mol model, download the original data from google drive:
+[Download the dataset (Drive folder)](https://drive.google.com/drive/folders/1I2uyFPSfeDS1ZXzKxw4ZQ5cu74sQGtSD?hl=zh)
+
+After downloading, you should have:
+- dataset.tar.gz # compressed dataset containing SDF files without hydrogens
+- final_csv_goodH.csv # CSV file containing metadata and diffusion indices
+
+Then extract the dataset:
+```bash
+mkdir -p dataset
+tar -xzvf dataset.tar.gz -C dataset
+```
 
 - If you have raw data in the `raw_data` folder, convert it into the required `.pt` format by running:  
   ```bash
