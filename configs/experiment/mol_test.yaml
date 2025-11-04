@@ -12,9 +12,9 @@ defaults:
 # all parameters below will be merged with parameters from default configurations set above
 # this allows you to overwrite only specified parameters
 
-tags: ["kaggle", "tgt"]
+tags: ["Small molecule design", "Diffusion model", "Peptide mimicry"]
 
-task_name: eval_mol_test
+task_name: peptide2mol
 
 data:
   batch_size: 8
