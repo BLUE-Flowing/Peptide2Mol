@@ -163,7 +163,7 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
 
 To facilitate quick verification of the software by reviewers, a minimal testset is provided.  
 This dataset contains a small example protein-peptide complex that can be used to run the full pipeline end-to-end.
-We used two protein complex files, 1bvr and 4bnw, from the LiGAN 10-testcase. We had already generated the pt files in advance according to the previously described process. 1bvr can be used for de novo protein generation, while 4bnw is used for fragment generation.
+We used two protein complex files, 1bvr and 4bnw, from the LiGAN 10-testcase [DOI	https://doi.org/10.1039/D1SC05976A]. We had already generated the pt files in advance according to the previously described process. 1bvr can be used for de novo protein generation, while 4bnw is used for fragment generation.
 
 #### De Novo Generation:
 
