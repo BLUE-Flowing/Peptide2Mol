@@ -19,11 +19,10 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 - [Dataset (Optional)](#optional-dataset)
 - [Training Weights](#training-weights)
 - [Data Preparation](#data-preparation)
-  - [Step1 Prepare Protein Inputs](#step1-prepare-protein-inputs)
-  - [Step2 Generate .pt Files](#step2-generate-pt-files)
+  - [Step1 Prepare Protein Inputs](#step-1-prepare-protein-inputs)
+  - [Step2 Generate .pt Files](#step-2-generate-pt-files)
 - [Inference](#inference)
-  - [Step3 Basic Inference](#basic-inference)
-  - [Demo Testing](#demo-testing)
+  - [Step3 Demo Generation](#step-3-demo-generation)
 - [Step4 Fix Molecules with Pocket2Mol (Optional)](#fix-molecules-with-pocket2mol)
 - [Retraining Peptide2Mol](#retraining-peptidemol)
   - [Model](#retraining-peptidemol)
@@ -102,7 +101,7 @@ mv PMT_major.ckpt ckpts/
 
 ### Data Preparation
 
-#### Step1: Prepare Protein Inputs
+#### Step 1: Prepare Protein Inputs
 
 To construct the receptor pocket model, extract residues located within 6 Å of the peptide ligand from the protein complex structure.  
 This can be achieved in **PyMOL** using the following commands:
@@ -159,6 +158,8 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
    Adjust the paths according to your needs.
 
 ### Inference
+
+#### Step 3: Demo Generation
 
 #### De Novo Generation:
 
