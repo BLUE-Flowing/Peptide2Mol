@@ -63,20 +63,16 @@ class MolDataModule(LightningDataModule):
         print(self.hparams,'self.hparams')
         # assert False
         self.all_data = MolDataset(self.hparams.data_dir, self.hparams.lmdb_fn)
-        # 计算剩余数据的大小
         remaining = len(self.all_data) - self.hparams.num_train
         print(self.all_data, len(self.all_data))
 
-        # 计算验证集的大小，取训练集大小的1/5和剩余数据中的最小值
         num_val = min(remaining, self.hparams.num_train // 5)
 
-        # 计算“无用集”的大小
         if self.hparams.num_train + num_val < len(self.all_data):
             num_useless = len(self.all_data) - self.hparams.num_train - num_val
         else:
-            num_useless = 0  # 如果没有剩余数据，无用集大小为0
+            num_useless = 0
 
-        # 重新分配训练集、验证集和无用集
         self.data_train, self.data_val, self.data_useless = random_split(
             self.all_data, [self.hparams.num_train, num_val, num_useless],
             generator=torch.Generator().manual_seed(self.hparams.data_seed)
