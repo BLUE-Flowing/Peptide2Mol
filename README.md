@@ -17,27 +17,7 @@
 5. [License](#license)
 ---
 
-## Dataset
 
-To train the main Peptide2Mol model, please download the original data from google drive:
-[Download the dataset (Drive folder)](https://drive.google.com/drive/folders/1I2uyFPSfeDS1ZXzKxw4ZQ5cu74sQGtSD?hl=zh)
-
-After downloading, you should have:
-- dataset.tar.gz # compressed dataset containing structure files
-- final_csv_goodH.csv # CSV file containing metadata and diffusion indices
-
-Then extract the dataset:
-```bash
-mkdir -p dataset
-tar -xzvf dataset.tar.gz -C dataset
-```
-After downloading and extracting the dataset into the `dataset/` folder, run the preprocessing script to convert the SDF files into PyTorch `.pt` files for model training:
-```bash
-python ./notebooks/deal_with_mol_5A.py \
-    ./dataset/final_csv_goodH.csv \
-    ./dataset/sdf_noH \
-    ./dataset/data.pt
-```
 
 ---
 
@@ -70,6 +50,28 @@ pip install Bio==1.6.2
 > **Note:** Installation may take up to one hour on a typical Linux machine.
 
 ---
+
+## Dataset
+
+To train the main Peptide2Mol model, please download the original data from google drive:
+[Download the dataset (Drive folder)](https://drive.google.com/drive/folders/1I2uyFPSfeDS1ZXzKxw4ZQ5cu74sQGtSD?hl=zh)
+
+After downloading, you should have:
+- dataset.tar.gz # compressed dataset containing structure files
+- final_csv_goodH.csv # CSV file containing metadata and diffusion indices
+
+Then extract the dataset:
+```bash
+mkdir -p dataset
+tar -xzvf dataset.tar.gz -C dataset
+```
+After downloading and extracting the dataset into the `dataset/` folder, run the preprocessing script to convert the SDF files into PyTorch `.pt` files for model training:
+```bash
+python ./notebooks/deal_with_mol_5A.py \
+       ./dataset/final_csv_goodH.csv \
+       ./dataset/sdf_noH \
+       ./dataset/data.pt
+```
 
 ## Running Peptide2Mol
 
