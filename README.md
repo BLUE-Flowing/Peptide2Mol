@@ -12,10 +12,10 @@
 ---
 ## Table of Contents
 1. [Setup Environment](#setup-environment)
-2. [(Optional) Dataset](#dataset)
-3. [Training Weights](#weight)
+2. [(Optional) Dataset](#optional-dataset)
+3. [Training Weights](#training-weights)
 4. [Running Peptide2Mol](#running-peptide2mol)
-5. [Retraining Peptide2Mol](#retraining-peptide2mol)
+5. [Retraining Peptide2Mol](#retraining-peptidemol)
 6. [License](#license)
 
 
