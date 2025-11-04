@@ -18,14 +18,15 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 - [Setup Environment](#setup-environment)
 - [Dataset (Optional)](#optional-dataset)
 - [Training Weights](#training-weights)
-- [Usage](#usage)
-  - [Prepare Protein Inputs](#step-1-prepare-protein-inputs)
-  - [Generate .pt Files](#step-2-generate-pt-files)
-  - [Inference](#step-3-inference)
-  - [Fix Molecules with Pocket2Mol](#step-4-fix-molecules-with-pocket2mol)
+- [Data Preparation](#data-preparation)
+  - [Step1 Prepare Protein Inputs](#prepare-protein-inputs)
+  - [Step2 Generate .pt Files](#generate-pt-files)
+- [Inference](#inference)
+  - [Step3 Basic Inference](#basic-inference)
+  - [Demo Testing](#demo-testing)
+- [Step4 Fix Molecules with Pocket2Mol (Optional)](#fix-molecules-with-pocket2mol)
 - [Retraining Peptide2Mol](#retraining-peptidemol)
-  - [Main Model](#retraining-peptidemol)
-  - [Guidance Model](#retraining-the-guidance-model)
+  - [Model](#retraining-peptidemol)
 - [License](#license)
 ---
 
@@ -99,17 +100,19 @@ mv PMT_major.ckpt ckpts/
 
 ## Usage
 
-### Step 1: Prepare Protein Inputs
+### Data Preparation
 
-To construct the receptor pocket model, extract residues located within 6 Å of the peptide ligand from the protein complex structure.
-This can be achieved in PyMOL using the following commands:
+#### Prepare Protein Inputs
+
+To construct the receptor pocket model, extract residues located within 6 Å of the peptide ligand from the protein complex structure.  
+This can be achieved in **PyMOL** using the following commands:
 
 ```bash
 select sel_poc, br. (sele around 6)
-save xxx_poc.pdb, sel_poc # xxx can be set as PDB id at inference
+save xxx_poc.pdb, sel_poc  # xxx can be set as the PDB ID for inference
 ```
 
-The resulting file xxx_poc.pdb should contain all residues within a 6 Å radius of the peptide and can be stored in a designated directory (e.g., ./poc_test/) for subsequent modeling or analysis.
+The resulting file xxx_poc.pdb contains all residues within a 6 Å radius of the peptide and can be stored in a designated directory (e.g., ./poc_test/) for subsequent modeling or analysis.
 
 ## Step 2: Generate `.pt` Files
 
@@ -155,7 +158,7 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
    
    Adjust the paths according to your needs.
 
-### Step 3: Inference
+### Inference
 
 #### De Novo Generation:
 
@@ -191,7 +194,7 @@ python src/eval.py experiment=mol_test \
   ++model.net.sample.batch_size=1
 ```
 
-### Step 4: Fix Molecules with Pocket2Mol
+### Fix Molecules with Pocket2Mol
 
 1. Organize your folder with an input folder containing subfolders of Peptide2Mol-generated molecules (folder endswith `_SDF`).  
 2. Run the following command to fix molecules using Pocket2Mol (casp means only the folder include name "casp" will be fixed, you can change it to what you like):
