@@ -84,6 +84,7 @@ python ./notebooks/deal_with_mol_5A.py \
 Then, the processed dataset file data.pt will be saved in the dataset/ directory.
 If you plan to retrain the model, make sure the path to data.pt is correct.
 
+
 ## Training Weights
 
 The pretrained model weights can be downloaded from the [release page](https://github.com/BLUE-Flowing/Peptide2Mol/releases/tag/v1.0).  
@@ -95,6 +96,8 @@ After downloading, place the checkpoint file in the following directory: './ckpt
 mkdir -p ckpts
 mv PMT_major.ckpt ckpts/
 ```
+
+
 ## Running Peptide2Mol
 
 ### Step 1: Prepare Protein Inputs
@@ -226,28 +229,6 @@ python src/train.py \
 • `+data.num_train`: Number of training samples (adjust based on your dataset)
 • `++data.batch_size`: Batch size (reduce if encountering GPU memory issues)
 • `++paths.log_dir`: Directory to save training logs and checkpoints
-
-### Retraining the Guidance Model
-
-To retrain the guidance model, use this configuration:
-
-```bash
-python src/train.py \
-  experiment=comp_test \
-  ++paths.data_dir=$PWD \
-  +data.lmdb_fn=data_only_peptide.pt \
-  +data.num_train=39000 \
-  ++data.batch_size=16 \
-  ++paths.log_dir=./logs_guidance \
-  trainer.devices=1 \
-  logger=many_loggers
-```
-
-**Guidance Model Notes:**
-• Uses a different dataset (`data_only_peptide5.pt`)
-• Typically requires fewer training samples
-• Set `trainer.devices` to match your available GPU count
-• Larger batch size recommended compared to main model
 
 **General Tips:**
 1. Ensure your data files are in the correct directory structure
