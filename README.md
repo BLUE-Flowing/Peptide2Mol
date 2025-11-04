@@ -79,7 +79,7 @@ If you plan to retrain the model, make sure the path to data.pt is correct.
 
 ## Training Weights
 
-The pretrained model weights can be downloaded at the [release page]([https://github.com/THUNLP-MT/PepGLAD/releases/tag/v1.0]). These checkpoints were trained on PepBench.
+The pretrained model weights can be downloaded at the [release page](https://github.com/THUNLP-MT/PepGLAD/releases/tag/v1.0). These checkpoints were trained on the released dataset above.
 
 ## Running Peptide2Mol
 
