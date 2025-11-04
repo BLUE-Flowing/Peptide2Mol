@@ -65,6 +65,7 @@ Then extract the dataset:
 ```bash
 mkdir -p dataset
 tar -xzvf dataset.tar.gz -C dataset
+mv final_csv_goodH.csv dataset/
 ```
 After downloading and extracting the dataset into the `dataset/` folder, run the preprocessing script to convert the SDF files into PyTorch `.pt` files for model training:
 ```bash
@@ -73,6 +74,8 @@ python ./notebooks/deal_with_mol_5A.py \
        ./dataset/sdf_noH \
        ./dataset/data.pt
 ```
+Then, the processed dataset file data.pt will be saved in the dataset/ directory.
+If you plan to retrain the model, make sure the path to data.pt is correct.
 
 ## Training Weights
 
