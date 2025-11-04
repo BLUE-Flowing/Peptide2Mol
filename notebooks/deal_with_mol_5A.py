@@ -1,6 +1,6 @@
 """
 ====================================================================================
-Script: prepare_drug3d_dataset.py
+Script: Main Data Preprocess for peptide2mol dataset
 Project: Peptide2Mol
 Author: Xinheng He, Yijia Zhang, et al.
 Description:
