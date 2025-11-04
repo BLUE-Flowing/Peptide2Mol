@@ -19,8 +19,8 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 - [Dataset (Optional)](#optional-dataset)
 - [Training Weights](#training-weights)
 - [Data Preparation](#data-preparation)
-  - [Step1 Prepare Protein Inputs](#prepare-protein-inputs)
-  - [Step2 Generate .pt Files](#generate-pt-files)
+  - [Step1 Prepare Protein Inputs](#step1-prepare-protein-inputs)
+  - [Step2 Generate .pt Files](#step2-generate-pt-files)
 - [Inference](#inference)
   - [Step3 Basic Inference](#basic-inference)
   - [Demo Testing](#demo-testing)
@@ -102,7 +102,7 @@ mv PMT_major.ckpt ckpts/
 
 ### Data Preparation
 
-#### Prepare Protein Inputs
+#### Step1: Prepare Protein Inputs
 
 To construct the receptor pocket model, extract residues located within 6 Å of the peptide ligand from the protein complex structure.  
 This can be achieved in **PyMOL** using the following commands:
@@ -114,7 +114,7 @@ save xxx_poc.pdb, sel_poc  # xxx can be set as the PDB ID for inference
 
 The resulting file xxx_poc.pdb contains all residues within a 6 Å radius of the peptide and can be stored in a designated directory (e.g., ./poc_test/) for subsequent modeling or analysis.
 
-## Step 2: Generate `.pt` Files
+#### Step 2: Generate `.pt` Files
 
 To generate `.pt` files for inference, follow these steps:
 
