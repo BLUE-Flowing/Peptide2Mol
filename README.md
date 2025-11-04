@@ -8,14 +8,12 @@
 <p align="center">
   </b> Overview of the Peptide2Mol diffusion-based framework.
 </p>
----
 ## Table of Contents
 1. [Setup Environment](#setup-environment)
 2. [Dataset](#dataset)
 3. [Running Peptide2Mol](#running-peptide2mol)
 4. [Retraining Peptide2Mol](#retraining-peptide2mol)
 5. [License](#license)
----
 
 
 
