@@ -173,12 +173,12 @@ To perform de novo generation, run the following command:
 ```bash
 DATA_DIR=./demo/example MODEL=Moldiff_test LMDB_FILE=1bvr_poc.pt SAMPLE_OUTPUT_DIR=./output/1bvr_poc bash scripts/inference.sh
 ```
-**Key Parameters:**
-  - DATA_DIR: directory containing the pre-generated .pt files
-  - MODEL: specifies the model to use (Moldiff_test)
-  - LMDB_FILE: the specific .pt file for the protein complex (1bvr_poc.pt)
-  - SAMPLE_OUTPUT_DIR: directory where the generated results will be saved
-  - 
+  - **Key Parameters:**
+    - DATA_DIR: directory containing the pre-generated .pt files
+    - MODEL: specifies the model to use (Moldiff_test)
+    - LMDB_FILE: the specific .pt file for the protein complex (1bvr_poc.pt)
+    - SAMPLE_OUTPUT_DIR: directory where the generated results will be saved
+
 The generated results will be stored in ./output/1bvr_poc_SDF, including:
 
  - 100 generated small molecules
