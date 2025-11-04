@@ -1,6 +1,9 @@
 # Peptide2Mol: A Diffusion Model for Transforming Peptide Binders into Small Molecules
 
-**Peptide2Mol** is a diffusion-based method for generating small-molecule candidates from peptide binders in drug design. This repository provides the necessary code, instructions, and model weights for inference or retraining. For any questions or issues, feel free to [open an issue](https://github.com/Xinheng-He/peptide2mol/issues) or reach out via email at [he-xinheng@foxmail.com](mailto:he-xinheng@foxmail.com).
+**Peptide2Mol** is a diffusion-based method for generating small-molecule candidates from peptide binders in drug design.  
+This repository provides the necessary code, instructions, and model weights for inference or retraining.  
+For any questions or issues, feel free to [open an issue](https://github.com/BLUE-Flowing/Peptide2Mol/issues) or reach out via email at [he-xinheng@foxmail.com](mailto:he-xinheng@foxmail.com).
+
 <p align="center">
   <img src="assets/overview.png" alt="Overview of Peptide2Mol" width="600"/>
 </p>
@@ -10,16 +13,20 @@
 </p>
 
 ---
-## Table of Contents
-1. [Setup Environment](#setup-environment)
-2. [(Optional) Dataset](#optional-dataset)
-3. [Training Weights](#training-weights)
-4. [Running Peptide2Mol](#running-peptide2mol)
-5. [Retraining Peptide2Mol](#retraining-peptidemol)
-6. [License](#license)
+## Quick Links
 
-
-
+- [Setup Environment](#setup-environment)
+- [Dataset (Optional)](#optional-dataset)
+- [Training Weights](#training-weights)
+- [Running Peptide2Mol](#running-peptidemol)
+  - [Prepare Protein Inputs](#step-1-prepare-protein-inputs)
+  - [Generate .pt Files](#step-2-generate-pt-files)
+  - [Inference](#step-3-inference)
+  - [Fix Molecules with Pocket2Mol](#step-4-fix-molecules-with-pocket2mol)
+- [Retraining Peptide2Mol](#retraining-peptidemol)
+  - [Main Model](#retraining-peptidemol)
+  - [Guidance Model](#retraining-the-guidance-model)
+- [License](#license)
 ---
 
 ## Setup Environment
@@ -80,14 +87,14 @@ If you plan to retrain the model, make sure the path to data.pt is correct.
 ## Training Weights
 
 The pretrained model weights can be downloaded from the [release page](https://github.com/BLUE-Flowing/Peptide2Mol/releases/tag/v1.0).  
+
 These checkpoints were trained on the released dataset described above.
 
-After downloading, place the checkpoint file in the following directory: ./ckpts/PMT_major.ckpt
+After downloading, place the checkpoint file in the following directory: './ckpts/PMT_major.ckpt'
 ```bash
 mkdir -p ckpts
 mv PMT_major.ckpt ckpts/
 ```
-
 ## Running Peptide2Mol
 
 ### Step 1: Prepare Protein Inputs
