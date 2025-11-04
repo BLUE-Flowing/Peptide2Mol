@@ -1,3 +1,16 @@
+"""
+====================================================================================
+Script: Data Preprocess for your own usage
+Project: Peptide2Mol
+Author: Xinheng He, Yijia Zhang, et al.
+Description:
+    This script converts molecular structures from SDF files into a pt file 
+    for downstream use in diffusion-based molecule generation or peptide-to-small-molecule modeling.
+    Each molecule is parsed into atomic and bond features, geometric coordinates,
+    and optionally diffusion indices (representing the peptide-derived atoms).
+====================================================================================
+"""
+
 import pandas as pd
 import torch
 import os, sys
@@ -22,6 +35,10 @@ def torchify_dict(data):
     return output
 
 def get_period_group(atom):
+    """
+    Get the periodic table period and group for a given atom.
+    (Supports elements up to Argon; others return -1.)
+    """
     atomic_number = atom.GetAtomicNum()
     periods = {1: 1, 2: 1, 3: 1, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 2, 10: 2,
                11: 3, 12: 3, 13: 3, 14: 3, 15: 3, 16: 3, 17: 3, 18: 3}
@@ -34,6 +51,10 @@ def get_period_group(atom):
 
 
 def one_of_k_encoding(x, allowable_set):
+    """
+    Return a one-hot encoding of an input value given an allowable set.
+    Raises an error if the input is not in the set.
+    """
     if x not in allowable_set:
         raise Exception("input {0} not in allowable set{1}:".format(x, allowable_set))
     return [x == s for s in allowable_set]
@@ -45,11 +66,16 @@ def one_of_k_encoding_unk(x, allowable_set):
     return [x == s for s in allowable_set]
 
 def calc_atom_features(atom):
+    """ Currently encodes atom type among ['C', 'N', 'O', 'F', 'P', 'S', 'Cl', 'Br'] """
     atom_symbol = [ 'C',  'N',  'O',  'F',  'P',  'S', 'Cl', 'Br']
     results = one_of_k_encoding_unk(atom.GetSymbol(), atom_symbol)      
     return np.array(results)
 
 def calc_bond_features(bond):
+    """
+    Compute bond type features as a binary vector:
+    [is_single, is_double, is_triple, is_aromatic, is_special]
+    """
     bt = bond.GetBondType()
     bond_feats = [
            bt == Chem.rdchem.BondType.SINGLE, 
