@@ -161,15 +161,15 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
 
 #### Step 3: Demo Generation
 
-To facilitate quick verification of the software by reviewers, a minimal testset is provided.  
-This dataset contains a small example protein-peptide complex that can be used to run the full pipeline end-to-end.
-We used two protein complex files, 1bvr and 4bnw, from the LiGAN 10-testcase [DOI	https://doi.org/10.1039/D1SC05976A]. We had already generated the pt files in advance according to the previously described process. 1bvr can be used for de novo protein generation, while 4bnw is used for fragment generation.
+To enable reviewers to quickly verify the software, we provide a minimal test dataset. This dataset includes a small set of example protein–peptide complexes that can be used to run the full pipeline end-to-end. Specifically, we include two protein complex structures, 1bvr and 4bnw, sourced from the LiGAN 10-testcase benchmark [DOI: https://doi.org/10.1039/D1SC05976A]. 
+The corresponding .pt files have been pre-generated following the procedure described above. In this dataset, 1bvr is intended for de novo protein generation, while 4bnw is used for partial generation.
 
 #### De Novo Generation:
 
 ```bash
-
+DATA_DIR=./demo/example LMDB_FILE=1bvr_poc.pt SAMPLE_OUTPUT_DIR=./output/1bvr_poc bash scripts/inference.sh
 ```
+The generated results will be displayed in the *./output/1bvr_poc_SDF* folder, containing 100 generated small molecules and the original pocket structures.
 
 #### Partial generation:
 
