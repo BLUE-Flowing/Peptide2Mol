@@ -8,6 +8,8 @@
 <p align="center">
   </b> Overview of the Peptide2Mol diffusion-based framework.
 </p>
+
+---
 ## Table of Contents
 1. [Setup Environment](#setup-environment)
 2. [Dataset](#dataset)
