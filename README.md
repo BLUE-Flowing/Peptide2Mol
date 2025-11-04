@@ -18,7 +18,7 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 - [Setup Environment](#setup-environment)
 - [Dataset (Optional)](#optional-dataset)
 - [Training Weights](#training-weights)
-- [Running Peptide2Mol](#running-peptidemol)
+- [Usage](#usage)
   - [Prepare Protein Inputs](#step-1-prepare-protein-inputs)
   - [Generate .pt Files](#step-2-generate-pt-files)
   - [Inference](#step-3-inference)
@@ -98,7 +98,7 @@ mv PMT_major.ckpt ckpts/
 ```
 
 
-## Running Peptide2Mol
+## Usage
 
 ### Step 1: Prepare Protein Inputs
 
