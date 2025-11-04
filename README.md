@@ -12,10 +12,11 @@
 ---
 ## Table of Contents
 1. [Setup Environment](#setup-environment)
-2. [Dataset](#dataset)
-3. [Running Peptide2Mol](#running-peptide2mol)
-4. [Retraining Peptide2Mol](#retraining-peptide2mol)
-5. [License](#license)
+2. [(Optional) Dataset](#dataset)
+3. [Training Weights](#weight)
+4. [Running Peptide2Mol](#running-peptide2mol)
+5. [Retraining Peptide2Mol](#retraining-peptide2mol)
+6. [License](#license)
 
 
 
@@ -51,7 +52,7 @@ pip install Bio==1.6.2
 
 ---
 
-## Dataset
+## (Optional) Dataset
 
 To train the main Peptide2Mol model, please download the original data from google drive:
 [Download the dataset (Drive folder)](https://drive.google.com/drive/folders/1I2uyFPSfeDS1ZXzKxw4ZQ5cu74sQGtSD?hl=zh)
@@ -72,6 +73,8 @@ python ./notebooks/deal_with_mol_5A.py \
        ./dataset/sdf_noH \
        ./dataset/data.pt
 ```
+
+## Training Weights
 
 ## Running Peptide2Mol
 
