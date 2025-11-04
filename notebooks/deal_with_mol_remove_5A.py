@@ -109,7 +109,6 @@ def safe_remove(inp_index, remove_indices_list):
 
     return new_index
 
-
 def parse_drug3d_mol(mol, diffu_idx, name, remove_idx, cutoff=5.):
     remove_indices_list = list(map(int, remove_idx.split(';')))
     num_bonds = mol.GetNumBonds()
@@ -126,7 +125,7 @@ def parse_drug3d_mol(mol, diffu_idx, name, remove_idx, cutoff=5.):
             ele = atom.GetAtomicNum()
             pos_list.append(list(pos))
             ele_list.append(ele)
-
+            
     try:
         Chem.SanitizeMol(mol)
     except:
@@ -198,8 +197,8 @@ def parse_drug3d_mol(mol, diffu_idx, name, remove_idx, cutoff=5.):
                         row.extend([ix, jx])
                         col.extend([jx, ix])
                         bond_type.extend([5, 5])
-                        bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
-                        bond_feats_all.append([0, 0, 0, 0, 0, 0, 1])
+                        bond_feats_all.append([0, 0, 0, 0, 1])
+                        bond_feats_all.append([0, 0, 0, 0, 1])
                         num_bonds += 1  
     # Prepare final arrays
     bond_index = np.array([row, col], dtype=np.int64)
