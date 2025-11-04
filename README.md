@@ -79,7 +79,14 @@ If you plan to retrain the model, make sure the path to data.pt is correct.
 
 ## Training Weights
 
-The pretrained model weights can be downloaded at the [release page](https://github.com/BLUE-Flowing/Peptide2Mol/releases/tag/v1.0). These checkpoints were trained on the released dataset above.
+The pretrained model weights can be downloaded from the [release page](https://github.com/BLUE-Flowing/Peptide2Mol/releases/tag/v1.0).  
+These checkpoints were trained on the released dataset described above.
+
+After downloading, place the checkpoint file in the following directory: ./ckpts/PMT_major.ckpt
+```bash
+mkdir -p ckpts
+mv PMT_major.ckpt ckpts/
+```
 
 ## Running Peptide2Mol
 
