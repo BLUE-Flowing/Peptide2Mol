@@ -1,7 +1,13 @@
 # Peptide2Mol: A Diffusion Model for Transforming Peptide Binders into Small Molecules
 
 **Peptide2Mol** is a diffusion-based method for generating small-molecule candidates from peptide binders in drug design. This repository provides the necessary code, instructions, and model weights for inference or retraining. For any questions or issues, feel free to [open an issue](https://github.com/Xinheng-He/peptide2mol/issues) or reach out via email at [he-xinheng@foxmail.com](mailto:he-xinheng@foxmail.com).
+<p align="center">
+  <img src="assets/overview.png" alt="Overview of Peptide2Mol" width="600"/>
+</p>
 
+<p align="center">
+  <b>Figure 1.</b> Overview of the Peptide2Mol diffusion-based framework.
+</p>
 ---
 
 ## Table of Contents
