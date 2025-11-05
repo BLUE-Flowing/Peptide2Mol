@@ -168,9 +168,9 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
 
 To facilitate **quick verification** of the software by reviewers, we provide a minimal test dataset. This dataset contains a small set of example protein–peptide complexes that can be used to run the full pipeline end-to-end. Specifically, the dataset includes two protein complex structures:
   - **1bvr** – suitable for de novo protein generation
-  - **4bnw** – suitable for partial (fragment-based) generation
+  - **PBMol_2qtg** – suitable for partial generation
 
-These structures are sourced from the LiGAN 10-testcase benchmark [DOI: https://doi.org/10.1039/D1SC05976A]. The corresponding .pt files have been pre-generated following the procedure described in **Step 2: Generate .pt Files**. Users can directly use these preprocessed files to test the pipeline without additional preprocessing.
+These structures are sourced from the LiGAN 10-testcase benchmark [DOI: https://doi.org/10.1039/D1SC05976A] and BioLip2 [DOI: https://doi.org/10.1093/nar/gkad630], respectively. The corresponding .pt files have been pre-generated following the procedure described in **Step 2: Generate .pt Files**. Users can directly use these preprocessed files to test the pipeline without additional preprocessing.
 
 #### De Novo Generation:
 
@@ -178,13 +178,14 @@ To perform de novo generation, run the following command:
 ```bash
 DATA_DIR=./demo/example MODEL=Moldiff_test LMDB_FILE=1bvr_poc.pt SAMPLE_OUTPUT_DIR=./output/1bvr_poc bash scripts/inference.sh
 ```
+
   - **Key Parameters:**
     - DATA_DIR: directory containing the pre-generated .pt files
     - MODEL: specifies the model to use (Moldiff_test)
     - LMDB_FILE: the specific .pt file for the protein complex (1bvr_poc.pt)
     - SAMPLE_OUTPUT_DIR: directory where the generated results will be saved
 
-The generated results will be stored in **./output/1bvr_poc_SDF**, including:
+The generated results will be stored in **`./output/1bvr_poc_SDF`**, including:
 
  - **100** generated small molecules
  - Original pocket structures corresponding to the protein target
@@ -193,9 +194,20 @@ This allows users to quickly verify the **de novo generation workflow**.
 
 #### Partial generation:
 
+To perform partial generation (e.g., ignoring some peptide structure to strengthing ), run the following command:
 ```bash
-DATA_DIR=./demo/example MODEL=Moldiff_test_partial LMDB_FILE=4bnw_partial_poc.pt SAMPLE_OUTPUT_DIR=./output/4bnw_partial_poc bash scripts/inference.sh
+DATA_DIR=./demo/example MODEL=Moldiff_test_partial LMDB_FILE=PBmol_2qtg.pt SAMPLE_OUTPUT_DIR=./output/PBmol_2qtg bash scripts/inference.sh
 ```
+
+  - **Key Parameters:**
+    - DATA_DIR: directory containing the pre-generated .pt files
+    - MODEL: specifies the model to use (Moldiff_test_partial)
+    - LMDB_FILE: the specific .pt file for the protein complex (PBmol_2qtg.pt)
+    - SAMPLE_OUTPUT_DIR: directory where the generated results will be saved
+   
+The generated results will be stored in **`./output/PBmol_2qtg_poc_SDF`**, including:
+  - **100** generated small molecules, partially conditioned on the input fragment
+  - Original pocket structures corresponding to the protein target
 
 ### Fix Molecules with Pocket2Mol
 
