@@ -162,7 +162,7 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
 
 ### Inference
 
-#### Step 3: Demo Generation
+#### **Step 3: Demo Generation**
 
 To facilitate **quick verification** of the software by reviewers, we provide a minimal test dataset. This dataset contains a small set of example protein–peptide complexes that can be used to run the full pipeline end-to-end. Specifically, the dataset includes two protein complex structures:
   - **1bvr** – suitable for de novo small molecule generation
