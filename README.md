@@ -61,20 +61,22 @@ pip install Bio==1.6.2
 
 ## (Optional) Dataset
 
+### Downloading
 To train the **Peptide2Mol** model from scratch, you can download the original dataset from **Google Drive**:
-
 [Download the dataset (Drive folder)](https://drive.google.com/drive/folders/1I2uyFPSfeDS1ZXzKxw4ZQ5cu74sQGtSD?hl=zh)
 
-After downloading, you should have:
-- **dataset.tar.gz** # compressed dataset containing structure files
-- **final_csv_goodH.csv** # CSV file containing metadata and diffusion indices
+After downloading, you should have the following files:
+- **dataset.tar.gz** —— compressed dataset containing structure files
+- **final_csv_goodH.csv** —— CSV file containing metadata and diffusion indices
 
-Then put them into **peptide2mol** folder and extract the dataset:
+Place both files into the **peptide2mol/** directory and then extract the dataset:
 ```bash
 mkdir -p dataset
 tar -xzvf dataset.tar.gz -C dataset
 mv final_csv_goodH.csv dataset/
 ```
+
+### Preprocessing
 After downloading and extracting the dataset into the **`dataset/`** folder, run the preprocessing script to convert the SDF files into PyTorch `.pt` files for model training:
 ```bash
 python ./notebooks/deal_with_mol_5A.py \
