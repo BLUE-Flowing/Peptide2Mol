@@ -36,8 +36,8 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 Follow these steps to set up an Anaconda environment for running Peptide2Mol. Ensure compatibility by installing the specified versions of **PyTorch, PyTorch-Geometric, CUDA (if applicable)**, and other dependencies:
 
 ```bash
-git clone https://github.com/Xinheng-He/peptide2mol
-cd peptide2mol
+git clone https://github.com/BLUE-Flowing/Peptide2Mol.git
+cd Peptide2Mol
 
 conda create --name peptide2mol python=3.9.19
 conda activate peptide2mol
@@ -71,7 +71,7 @@ After downloading, you should have the following files:
 - **dataset.tar.gz** —— compressed dataset containing structure files
 - **final_csv_goodH.csv** —— CSV file containing metadata and diffusion indices
 
-Place both files into the **peptide2mol/** directory and then extract the dataset:
+Place both files into the **Peptide2Mol/** directory and then extract the dataset:
 ```bash
 mkdir -p dataset
 tar -xzvf dataset.tar.gz -C dataset
