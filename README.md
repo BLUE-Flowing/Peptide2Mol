@@ -158,7 +158,7 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
 #### Step 3: Demo Generation
 
 To facilitate **quick verification** of the software by reviewers, we provide a minimal test dataset. This dataset contains a small set of example protein–peptide complexes that can be used to run the full pipeline end-to-end. Specifically, the dataset includes two protein complex structures:
-  - **1bvr** – suitable for de novo protein generation
+  - **1bvr** – suitable for de novo small molecule generation
   - **PBMol_2qtg** – suitable for partial generation
 
 These structures are sourced from the LiGAN 10-testcase benchmark [DOI: https://doi.org/10.1039/D1SC05976A] and BioLip2 [DOI: https://doi.org/10.1093/nar/gkad630], respectively. The corresponding .pt files have been pre-generated following the procedure described in Step 2. Users can directly use these preprocessed files to test the pipeline without additional preprocessing.
