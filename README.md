@@ -117,10 +117,10 @@ There are two independent workflows for generating `.pt` files:
 Run the following command to read all PDB files with 'poc' in their filename and generate `.pt` files. Ensure that the corresponding SDF files share the same suffix name:
 
 ```bash
-python ./notebooks/deal_with_mol_test_from_pdb_pal_5A.py ./poc_test/
+python ./notebooks/deal_with_mol_test_from_pdb_pal_5A.py ./demo/example/
 ```
 
-This will process all PDB files in the `./poc_test/` directory containing 'poc' in their filenames, along with the matching SDF files, and generate the corresponding `.pt` files.
+This will process all PDB files in the `./demo/example/` directory containing 'poc' in their filenames, along with the matching SDF files, and generate the corresponding `.pt` files.
 
 ##### Workflow B. Generate `.pt` Files for Partial Ligand Parts
 
