@@ -285,7 +285,6 @@ def main():
                     print('Skipping (%d) Num: %s' % (num_skipped, mol_id))
 
             db.close()
-    print('Processed %d molecules' % (len(df_use) - num_skipped), 'Skipped %d molecules' % num_skipped)
 
 if __name__ == '__main__':
     main()
