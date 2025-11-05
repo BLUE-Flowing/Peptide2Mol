@@ -25,7 +25,7 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
   - [Step2 Generate .pt Files](#step-2-generate-pt-files)
 - [Inference](#inference)
   - [Step3 Demo Generation](#step-3-demo-generation)
-- [Step4 Fix Molecules with Pocket2Mol (Optional)](#fix-molecules-with-pocket2mol)
+- [Step4 Fix Molecules with Pocket2Mol (Optional)](#optional-step-4-fix-molecules-with-pocket2mol)
 - [Retraining Peptide2Mol](#retraining-peptidemol)
   - [Model](#retraining-peptidemol)
 - [License](#license)
@@ -170,7 +170,7 @@ To facilitate **quick verification** of the software by reviewers, we provide a 
   - **1bvr** – suitable for de novo protein generation
   - **PBMol_2qtg** – suitable for partial generation
 
-These structures are sourced from the LiGAN 10-testcase benchmark [DOI: https://doi.org/10.1039/D1SC05976A] and BioLip2 [DOI: https://doi.org/10.1093/nar/gkad630], respectively. The corresponding .pt files have been pre-generated following the procedure described in **Step 2: Generate .pt Files**. Users can directly use these preprocessed files to test the pipeline without additional preprocessing.
+These structures are sourced from the LiGAN 10-testcase benchmark [DOI: https://doi.org/10.1039/D1SC05976A] and BioLip2 [DOI: https://doi.org/10.1093/nar/gkad630], respectively. The corresponding .pt files have been pre-generated following the procedure described in Step 2. Users can directly use these preprocessed files to test the pipeline without additional preprocessing.
 
 #### De Novo Generation:
 
@@ -209,7 +209,7 @@ The generated results will be stored in **`./output/PBmol_2qtg_poc_SDF`**, inclu
   - **100** generated small molecules, partially conditioned on the input fragment
   - Original pocket structures corresponding to the protein target
 
-### Fix Molecules with Pocket2Mol
+### (Optional) Step 4: Fix Molecules with Pocket2Mol
 
 1. Organize your folder with an input folder containing subfolders of Peptide2Mol-generated molecules (folder endswith `_SDF`).  
 2. Run the following command to fix molecules using Pocket2Mol (casp means only the folder include name "casp" will be fixed, you can change it to what you like):
