@@ -199,6 +199,7 @@ DATA_DIR=./demo/example MODEL=Moldiff_test_partial LMDB_FILE=PBmol_2qtg.pt SAMPL
 The generated results will be stored in **`./output/PBmol_2qtg_SDF`**, including:
   - **100** generated small molecules, partially conditioned on the input fragment
   - Original pocket structures corresponding to the protein target
+---
 
 ### (Optional) Step 4: Fix Molecules with Pocket2Mol
 
@@ -218,11 +219,6 @@ After downloading, place the checkpoint file **Pretrained_Pocket2Mol.pt** into t
    ./Pocket2Mol/ckpt/
 ```
 
-Detailed configuration and usage instructions are provided in:
-```bash
-   ./Pocket2Mol/ckpt/README.md
-```
-
 3. To run Pocket2Mol and fix incorrect atoms, execute the following command. For instance, to process only the folders containing the keyword "1bvr" in their names (you can change this keyword as needed):
 
 ```bash
@@ -231,8 +227,7 @@ python get_wrong_atom_index.py ../output/ 1bvr
 ```
 
 Each molecule takes approximately one minute to process on an NVIDIA A100 GPU, and the corrected structures will be saved in  `../output_fixed`.
-
-
+---
 
 ## Retraining Peptide2Mol
 
