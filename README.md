@@ -211,15 +211,20 @@ The generated results will be stored in **`./output/PBmol_2qtg_SDF`**, including
 
 ### (Optional) Step 4: Fix Molecules with Pocket2Mol
 
-1. Organize your folder with an input folder containing subfolders of Peptide2Mol-generated molecules (folder endswith `_SDF`).  
-2. Run the following command to fix molecules using Pocket2Mol (casp means only the folder include name "casp" will be fixed, you can change it to what you like):
+1. Make sure your generated molecules from Peptide2Mol are organized in folders ending with **`_SDF`**, e.g.:
+```bash
+   ./output/1bvr_poc_SDF/
+   ./output/PBmol_2qtg_SDF/
+```
+
+2. Run Pocket2Mol to check and fix any incorrect atoms. For example, if you want to process only folders that include "1bvr" in their name (you can change this keyword to match your folder names), run:
 
 ```bash
 cd Pocket2Mol
-python get_wrong_atom_index_0h.py $PWD/inp_folder/ casp
+python get_wrong_atom_index_0h.py ../outputs/ 1bvr
 ```
 
-The output will be saved in `inp_folder_output`.
+The output will be saved in `../outputs`.
 
 > **Note:** The `ckpt` files are available for download via Google Drive. Generating one molecule typically takes about one minute on an H800 GPU.
 
