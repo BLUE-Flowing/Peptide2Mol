@@ -226,11 +226,11 @@ The output will be saved in `../outputs`.
 To retrain the main Peptide2Mol model, use the following command structure:
 
 ```bash
-DATA_DIR=./dataset MODEL=Moldiff_test_partial LMDB_FILE=data.pt NUM_TRAIN=370000 LOG_DIR=./logs_retrain bash scripts/inference.sh
+DATA_DIR=./dataset EXPERIMENT=mol_test LMDB_FILE=data.pt NUM_TRAIN=370000 LOG_DIR=./logs_retrain bash scripts/inference.sh
 ```
 
  - **Key Parameters:**
-   - `++paths.data_dir`: Path to directory containing your training data
+   - `DATA_DIR`: Path to the folder containing your training `.pt` or LMDB data files.
    - `+data.lmdb_fn`: Filename of your training data file
    - `+data.num_train`: Number of training samples (adjust based on your dataset)
    - `++data.batch_size`: Batch size (reduce if encountering GPU memory issues)
