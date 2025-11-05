@@ -180,19 +180,17 @@ class MolDiff(Module):
         Predict Mol at step `0` given perturbed Mol at step `t` with hidden dims and time step
         """
         # 1 node and edge embedding + time embedding
-        time_embed_node = self.time_emb(t.index_select(0, batch_node))
+                time_embed_node = self.time_emb(t.index_select(0, batch_node))
         poc_embed_node = self.poc_emb(poc_or_not)
+        dtype = self.node_embedder.weight.dtype
+        device = self.node_embedder.weight.device
         # print(h_node_pert.shape, h_node_pert, poc_or_not)
         mask = poc_or_not == 1
         selected_h_node_pert = h_node_pert[mask]
         # print(selected_h_node_pert, 'selected_h_node_pert')
-        h_node_pert = h_node_pert.to(torch.float16)
-        time_embed_node = time_embed_node.to(torch.float16)
-        poc_embed_node = poc_embed_node.to(torch.float16)
-        # print(h_node_pert.shape, time_embed_node.shape, poc_embed_node.shape,self.node_embedder(h_node_pert).shape)
-        # print(self.node_embedder(h_node_pert).dtype)
-        # print(time_embed_node.dtype)
-        # print(poc_embed_node.dtype)
+        h_node_pert = h_node_pert.to(device=device, dtype=dtype)
+        time_embed_node = time_embed_node.to(device=device, dtype=dtype)
+        poc_embed_node = poc_embed_node.to(device=device, dtype=dtype)
         h_node_pert = torch.cat([self.node_embedder(h_node_pert), time_embed_node, poc_embed_node], dim=-1)
         time_embed_edge = self.time_emb(t.index_select(0, batch_edge))
         h_edge_pert = torch.cat([self.edge_embedder(h_edge_pert), time_embed_edge], dim=-1)
