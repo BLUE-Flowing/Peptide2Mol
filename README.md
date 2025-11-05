@@ -225,7 +225,7 @@ python get_wrong_atom_index_0h.py ../outputs/ 1bvr
 
 The output will be saved in `../outputs`.
 
-> **Note:** The `ckpt` files are available for download from the [release page](https://github.com/BLUE-Flowing/Peptide2Mol/releases/tag/v1.0). Generating one molecule typically takes about one minute on an A100 GPU.
+> **Note:** The `ckpt` files are available for download from **Google Drive**: [https://drive.google.com/drive/folders/1KfdOczjUPITPhIvCuBmnj4xFTV-iI2xB?usp=sharing], For detailed configuration and usage instructions, please refer to **`./Pocket2Mol/ckpts/README.md`**. Generating one molecule typically takes about one minute on an A100 GPU.
 
 ---
 
