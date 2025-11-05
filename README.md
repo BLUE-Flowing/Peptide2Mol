@@ -139,7 +139,7 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
    First, combine the pocket PDB and ligand into a single SDF file.
 
 2. **Prepare the CSV File**  
-   Next, create a CSV file (e.g., `poc_test/partial_input.csv`) with the following format:
+   Next, create a CSV file (e.g., `./demo/example/partial_input.csv`) with the following format:
 
    ```csv
    filename,diffu_idx,remove_idx
@@ -153,11 +153,11 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
    Use the following command to generate the `.pt` files for the partial ligand:
 
    ```bash
-   python ./notebooks/deal_with_mol_remove_5A.py poc_test/partial_input.csv poc_test/ poc_test/
+   python ./notebooks/deal_with_mol_remove_5A.py ./demo/example/partial_input.csv ./demo/example ./demo/example
    ```
 
-   - The first `poc_test/` specifies the path to the SDF files.
-   - The second `poc_test/` specifies the output path where the `.pt` files will be saved.
+   - The first `./demo/example` specifies the path to the SDF files.
+   - The second `./demo/example` specifies the output path where the `.pt` files will be saved.
    
    Adjust the paths according to your needs.
    
@@ -214,7 +214,6 @@ The generated results will be stored in **`./output/PBmol_2qtg_SDF`**, including
 1. Make sure your generated molecules from Peptide2Mol are organized in folders ending with **`_SDF`**, e.g.:
 ```bash
    ./output/1bvr_poc_SDF/
-   ./output/PBmol_2qtg_SDF/
 ```
 
 2. Run Pocket2Mol to check and fix any incorrect atoms. For example, if you want to process only folders that include "1bvr" in their name (you can change this keyword to match your folder names), run:
@@ -226,7 +225,7 @@ python get_wrong_atom_index_0h.py ../outputs/ 1bvr
 
 The output will be saved in `../outputs`.
 
-> **Note:** The `ckpt` files are available for download via Google Drive. Generating one molecule typically takes about one minute on an H800 GPU.
+> **Note:** The `ckpt` files are available for download from the [release page](https://github.com/BLUE-Flowing/Peptide2Mol/releases/tag/v1.0). Generating one molecule typically takes about one minute on an A100 GPU.
 
 ---
 
