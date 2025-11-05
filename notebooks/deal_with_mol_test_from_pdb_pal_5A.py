@@ -247,44 +247,43 @@ def pdb_to_sdf(pdb_file, sdf_file):
 def main():
     pdb_path = sys.argv[1]
     for _, line in enumerate(os.listdir(pdb_path)):
-        if line.endswith('.pdb') and 'antigen' in line:
-            processed_path = f'{pdb_path}/{line[:-4]}.pt'
-            db = lmdb.open(
-                        processed_path,
-                        map_size=500*(1024*1024*1024),   # 500GB
-                        create=True,
-                        subdir=False,
-                        readonly=False, # Writable
-                    )
-            with db.begin(write=True, buffers=True) as txn:
-                pdb_to_sdf(os.path.join(pdb_path, line), os.path.join(pdb_path, line[:-4]+'.sdf'))
-                mol_id = line[:-4]
-                diffu_idx = None
-                num_skipped = 0
+        processed_path = f'{pdb_path}/{line[:-4]}.pt'
+        db = lmdb.open(
+                    processed_path,
+                    map_size=500*(1024*1024*1024),   # 500GB
+                    create=True,
+                    subdir=False,
+                    readonly=False, # Writable
+                )
+        with db.begin(write=True, buffers=True) as txn:
+            pdb_to_sdf(os.path.join(pdb_path, line), os.path.join(pdb_path, line[:-4]+'.sdf'))
+            mol_id = line[:-4]
+            diffu_idx = None
+            num_skipped = 0
+            
+            try:
+                # load all confs of the mol
+                suppl = Chem.SDMolSupplier(os.path.join(pdb_path, line[:-4]+'.sdf'))
+                mol = suppl[0]
+                # santinize the mol
+                Chem.SanitizeMol(mol)
+                mol = Chem.RemoveAllHs(mol)
+                ligand_dict = parse_drug3d_mol(mol, diffu_idx, mol_id)
+                ligand_dict = torchify_dict(ligand_dict)
+                data = Drug3DData.from_drug3d_dicts(ligand_dict)
+
+                data.mol_id = mol_id+str(_)
                 
-                try:
-                    # load all confs of the mol
-                    suppl = Chem.SDMolSupplier(os.path.join(pdb_path, line[:-4]+'.sdf'))
-                    mol = suppl[0]
-                    # santinize the mol
-                    Chem.SanitizeMol(mol)
-                    mol = Chem.RemoveAllHs(mol)
-                    ligand_dict = parse_drug3d_mol(mol, diffu_idx, mol_id)
-                    ligand_dict = torchify_dict(ligand_dict)
-                    data = Drug3DData.from_drug3d_dicts(ligand_dict)
+                txn.put(
+                    key = str(mol_id+str(_)).encode(),
+                    value = pickle.dumps(data)
+                )
+            except:
+                traceback.print_exc()
+                num_skipped += 1
+                print('Skipping (%d) Num: %s' % (num_skipped, mol_id))
 
-                    data.mol_id = mol_id+str(_)
-                    
-                    txn.put(
-                        key = str(mol_id+str(_)).encode(),
-                        value = pickle.dumps(data)
-                    )
-                except:
-                    traceback.print_exc()
-                    num_skipped += 1
-                    print('Skipping (%d) Num: %s' % (num_skipped, mol_id))
-
-            db.close()
+        db.close()
 
 if __name__ == '__main__':
     main()
