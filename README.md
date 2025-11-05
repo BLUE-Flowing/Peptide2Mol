@@ -35,28 +35,19 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 Follow these steps to set up an Anaconda environment for running Peptide2Mol. Ensure compatibility by installing the specified versions of **PyTorch, PyTorch-Geometric, CUDA (if applicable)**, and other dependencies:
 
 ```bash
+# 1. Clone the repository
 git clone https://github.com/BLUE-Flowing/Peptide2Mol.git
 cd Peptide2Mol
 
-conda create --name peptide2mol python=3.9.19
+# 2. Create the Conda environment from the provided YAML file
+conda env create -f env_cu121.yaml
 conda activate peptide2mol
 
-pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2
-pip install hydra-core==1.3.2 hydra-colorlog==1.2.0 hydra-optuna-sweeper==1.2.0 rootutils==1.0.7 pre-commit==3.7.0 rich==13.7.1 pytest==8.1.1
-pip install lightning==2.2.2
-pip install numpy==1.22.4
-pip install pandas==2.2.2
-pip install lmdb==1.4.1
-pip install rdkit==2023.9.6
-pip install torch-geometric==2.5.2
-pip install numba==0.59.1
-pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.2.2+cu121.html
-pip install easydict==1.13
-pip install tensorboard==2.16.2
-pip install Bio==1.6.2
+# 3. Install PyTorch-Geometric dependencies for CUDA 12.1
+pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.2.2+cu121.html
 ```
 
-> **Note:** Installation may take up to one hour on a typical Linux machine.
+> **Note:** The env_cu121.yaml file is pre-configured for Python 3.9 and CUDA 12.1. If you are using a different GPU or CUDA version, adjust the YAML file or PyTorch-Geometric wheel URL accordingly.
 
 ---
 
