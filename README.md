@@ -211,10 +211,10 @@ The generated results will be stored in **`./output/PBmol_2qtg_SDF`**, including
 
 ```bash
 cd Pocket2Mol
-python get_wrong_atom_index.py ../outputs/ 1bvr
+python get_wrong_atom_index.py ../output/ 1bvr
 ```
 
-The output will be saved in `../outputs`.
+The output will be saved in `../output_fixed`.
 
 > **Note:** The `ckpt` files are available for download from **Google Drive**: [https://drive.google.com/drive/folders/1KfdOczjUPITPhIvCuBmnj4xFTV-iI2xB?usp=sharing], For detailed configuration and usage instructions, please refer to **`./Pocket2Mol/ckpts/README.md`**. Generating one molecule typically takes about one minute on an A100 GPU.
 
