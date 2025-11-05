@@ -26,8 +26,7 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 - [Inference](#inference)
   - [Step3 Demo Generation](#step-3-demo-generation)
 - [Step4 Fix Molecules with Pocket2Mol (Optional)](#optional-step-4-fix-molecules-with-pocket2mol)
-- [Retraining Peptide2Mol](#retraining-peptidemol)
-  - [Model](#retraining-peptidemol)
+- [Retraining Peptide2Mol](#retraining-peptide2mol)
 - [License](#license)
 ---
 
@@ -225,9 +224,7 @@ The output will be saved in `inp_folder_output`.
 
 ---
 
-## Retraining the Models
-
-### Retraining Peptide2Mol
+## Retraining Peptide2Mol
 
 To retrain the main Peptide2Mol model, use the following command structure:
 
