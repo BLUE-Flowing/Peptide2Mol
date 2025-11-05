@@ -236,11 +236,11 @@ DATA_DIR=./dataset MODEL=Moldiff_test_partial LMDB_FILE=data.pt NUM_TRAIN=370000
 ```
 
  - **Key Parameters:**
-  - `++paths.data_dir`: Path to directory containing your training data
-  - `+data.lmdb_fn`: Filename of your training data file
-  - `+data.num_train`: Number of training samples (adjust based on your dataset)
-  - `++data.batch_size`: Batch size (reduce if encountering GPU memory issues)
-  - `++paths.log_dir`: Directory to save training logs and checkpoints
+   - `++paths.data_dir`: Path to directory containing your training data
+   - `+data.lmdb_fn`: Filename of your training data file
+   - `+data.num_train`: Number of training samples (adjust based on your dataset)
+   - `++data.batch_size`: Batch size (reduce if encountering GPU memory issues)
+   - `++paths.log_dir`: Directory to save training logs and checkpoints
 
  - **General Tips:**
    - Ensure your data files are in the correct directory structure
