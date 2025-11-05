@@ -220,7 +220,7 @@ The generated results will be stored in **`./output/PBmol_2qtg_SDF`**, including
 
 ```bash
 cd Pocket2Mol
-python get_wrong_atom_index_0h.py ../outputs/ 1bvr
+python get_wrong_atom_index.py ../outputs/ 1bvr
 ```
 
 The output will be saved in `../outputs`.
