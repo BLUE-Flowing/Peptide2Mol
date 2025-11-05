@@ -662,6 +662,6 @@ for fn in os.listdir(f'{init_dir}'):
                             x_str = ','.join(x_list)
 
                             
-                            os.system(f'python sample_for_pdb_hxh.py --pdb_path {init_dir}/{fn}/{sub_fns} --log_path_name  {log_path_name} --to_be_removed {x_str} --ligand_path {init_dir}/{fn}/{sub_fns1} --outdir {sys.argv[1][:-1]}_output')
+                            os.system(f'python sample_for_pdb_fixgen.py --pdb_path {init_dir}/{fn}/{sub_fns} --log_path_name  {log_path_name} --to_be_removed {x_str} --ligand_path {init_dir}/{fn}/{sub_fns1} --outdir {sys.argv[1][:-1]}_output')
                     # os.system(f'python sample_for_pdb_random.py --pdb_path {init_dir}/{fn}/{sub_fns}  --ligand_path {init_dir}/{fn}/{sub_fns1}')
 print(np.mean(bad_property), np.std(bad_property))
