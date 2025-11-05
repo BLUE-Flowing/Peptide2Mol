@@ -1,4 +1,4 @@
-name: peptide2mol_test
+name: peptide2mol
 channels:
   - conda-forge
   - pytorch
