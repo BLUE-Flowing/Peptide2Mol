@@ -247,6 +247,8 @@ def pdb_to_sdf(pdb_file, sdf_file):
 def main():
     pdb_path = sys.argv[1]
     for _, line in enumerate(os.listdir(pdb_path)):
+        if 'poc' not in line: continue
+        print(f'Processing {line}')
         processed_path = f'{pdb_path}/{line[:-4]}.pt'
         db = lmdb.open(
                     processed_path,
