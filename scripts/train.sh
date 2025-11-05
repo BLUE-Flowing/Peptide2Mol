@@ -33,7 +33,8 @@ print_usage() {
 run_training() {
     # Set default values if not already defined
     EXPERIMENT=${EXPERIMENT:-mol_test}
-    DATA_DIR=${DATA_DIR:-$(realpath ./dataset)}
+    DATA_DIR=${DATA_DIR:-"./dataset"}
+    DATA_DIR=$(realpath "$DATA_DIR")
     LMDB_FILE=${LMDB_FILE:-"data.pt"}
     NUM_TRAIN=${NUM_TRAIN:-370000}
     BATCH_SIZE=${BATCH_SIZE:-8}
@@ -51,11 +52,11 @@ run_training() {
     echo ""
 
     # Execute the training command
-    CUDA_VISIBLE_DEVICES=5 python src/train.py \
+    CUDA_VISIBLE_DEVICES=6 python src/train.py \
         experiment=$EXPERIMENT \
         ++paths.data_dir=$DATA_DIR \
-        +data.lmdb_fn=$LMDB_FILE \
-        +data.num_train=$NUM_TRAIN \
+        ++data.lmdb_fn=$LMDB_FILE \
+        ++data.num_train=$NUM_TRAIN \
         ++data.batch_size=$BATCH_SIZE \
         ++paths.log_dir=$LOG_DIR \
         logger=$LOGGER
