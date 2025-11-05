@@ -205,7 +205,7 @@ DATA_DIR=./demo/example MODEL=Moldiff_test_partial LMDB_FILE=PBmol_2qtg.pt SAMPL
     - LMDB_FILE: the specific .pt file for the protein complex (PBmol_2qtg.pt)
     - SAMPLE_OUTPUT_DIR: directory where the generated results will be saved
    
-The generated results will be stored in **`./output/PBmol_2qtg_poc_SDF`**, including:
+The generated results will be stored in **`./output/PBmol_2qtg_SDF`**, including:
   - **100** generated small molecules, partially conditioned on the input fragment
   - Original pocket structures corresponding to the protein target
 
@@ -232,29 +232,22 @@ The output will be saved in `inp_folder_output`.
 To retrain the main Peptide2Mol model, use the following command structure:
 
 ```bash
-python src/train.py \
-  experiment=mol_test \
-  ++paths.data_dir=$PWD/../ \
-  +data.lmdb_fn=data_all5.pt \
-  +data.num_train=370000 \
-  ++data.batch_size=8 \
-  ++paths.log_dir=./logs_retrain \
-  logger=many_loggers
+DATA_DIR=./dataset MODEL=Moldiff_test_partial LMDB_FILE=data.pt NUM_TRAIN=370000 LOG_DIR=./logs_retrain bash scripts/inference.sh
 ```
 
-**Key Parameters:**
-• `++paths.data_dir`: Path to directory containing your training data
-• `+data.lmdb_fn`: Filename of your training data file
-• `+data.num_train`: Number of training samples (adjust based on your dataset)
-• `++data.batch_size`: Batch size (reduce if encountering GPU memory issues)
-• `++paths.log_dir`: Directory to save training logs and checkpoints
+ - **Key Parameters:**
+  - `++paths.data_dir`: Path to directory containing your training data
+  - `+data.lmdb_fn`: Filename of your training data file
+  - `+data.num_train`: Number of training samples (adjust based on your dataset)
+  - `++data.batch_size`: Batch size (reduce if encountering GPU memory issues)
+  - `++paths.log_dir`: Directory to save training logs and checkpoints
 
-**General Tips:**
-1. Ensure your data files are in the correct directory structure
-2. Adjust batch sizes according to your GPU memory capacity
-3. Monitor training progress through logs in specified `log_dir`
-4. Use absolute paths if running from different directories
-5. Consider using nohup or TMUX for long training sessions
+ - **General Tips:**
+   - Ensure your data files are in the correct directory structure
+   - Adjust batch sizes according to your GPU memory capacity
+   - Monitor training progress through logs in specified `log_dir`
+   - Use absolute paths if running from different directories
+   - Consider using nohup or TMUX for long training sessions
 
 ## License
 
