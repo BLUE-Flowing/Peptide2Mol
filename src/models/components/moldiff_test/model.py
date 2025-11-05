@@ -177,7 +177,7 @@ class MolWrapper(nn.Module):
                 diffu_idx.append(i + idx_start)
             
 
-            node_padding_init = torch.randn(n_nodes,8) # original 29
+            node_padding_init = torch.randn(n_nodes,8)
             ref_data = ref_data.to(node_padding_init.device)
             type_padded = torch.cat([node_padding_init, ref_data.node_type])
             node_padding.append(type_padded)
