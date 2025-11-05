@@ -211,7 +211,7 @@ Pocket2Mol corrects atomic inconsistencies and ensures the generated molecules r
    ./output/1bvr_poc_SDF/
 ```
 
-2. **Pocket2Mol pretrained model weights** are available for download from **Google Drive** [Download the Pocket2Mol pretrained checkpoint (Drive folder)](https://drive.google.com/drive/folders/1KfdOczjUPITPhIvCuBmnj4xFTV-iI2xB?usp=sharing), For detailed configuration and usage instructions, please refer to **`./Pocket2Mol/ckpts/README.md`**. 
+2. **Pocket2Mol pretrained model weights** are available for download from **Google Drive**: [Download Link (Drive folder)](https://drive.google.com/drive/folders/1KfdOczjUPITPhIvCuBmnj4xFTV-iI2xB?usp=sharing), For detailed configuration and usage instructions, please refer to **`./Pocket2Mol/ckpts/README.md`**. 
 3. To run Pocket2Mol and fix incorrect atoms, execute the following command. For instance, to process only the folders containing the keyword "1bvr" in their names (you can change this keyword as needed):
 
 ```bash
