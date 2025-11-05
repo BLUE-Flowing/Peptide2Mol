@@ -160,6 +160,7 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
    - The second `poc_test/` specifies the output path where the `.pt` files will be saved.
    
    Adjust the paths according to your needs.
+   
 
 ### Inference
 
@@ -224,6 +225,7 @@ The output will be saved in `inp_folder_output`.
 
 ---
 
+
 ## Retraining Peptide2Mol
 
 To retrain the main Peptide2Mol model, use the following command structure:
@@ -245,6 +247,7 @@ DATA_DIR=./dataset MODEL=Moldiff_test_partial LMDB_FILE=data.pt NUM_TRAIN=370000
    - Monitor training progress through logs in specified `log_dir`
    - Use absolute paths if running from different directories
    - Consider using nohup or TMUX for long training sessions
+
 
 ## License
 
