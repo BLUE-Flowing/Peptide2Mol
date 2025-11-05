@@ -119,9 +119,9 @@ The resulting file xxx_poc.pdb contains all residues within a 6 Å radius of the
 
 #### Step 2: Generate `.pt` Files
 
-To generate `.pt` files for inference, follow these steps:
+There are two independent workflows for generating `.pt` files:
 
-### 1. Generate `.pt` Files for All PDB Files Containing 'poc' in Their Filename
+##### Workflow A. Generate `.pt` Files for All PDB Files Containing 'poc' in Their Filename
 
 Run the following command to read all PDB files with 'poc' in their filename and generate `.pt` files. Ensure that the corresponding SDF files share the same suffix name:
 
@@ -131,7 +131,7 @@ python ./notebooks/deal_with_mol_test_from_pdb_pal_5A.py ./poc_test/
 
 This will process all PDB files in the `./poc_test/` directory containing 'poc' in their filenames, along with the matching SDF files, and generate the corresponding `.pt` files.
 
-### 2. Generate `.pt` Files for Partial Ligand Parts
+##### Workflow B. Generate `.pt` Files for Partial Ligand Parts
 
 If you wish to generate `.pt` files for only part of the ligand, follow these steps:
 
