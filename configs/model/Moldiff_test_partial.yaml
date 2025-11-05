@@ -17,8 +17,8 @@ scheduler:
 
 net:
   _target_: src.models.components.moldiff_test_partial.model.MolWrapper
-  input_node_dim: 29
-  input_edge_dim: 8
+  input_node_dim: 8
+  input_edge_dim: 6
   pos_noise_std: 0.05
   node_dim: 256
   edge_dim: 64
