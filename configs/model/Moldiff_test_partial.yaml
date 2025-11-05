@@ -25,6 +25,7 @@ net:
   time_dim: 10
   poc_dim: 10
   bond_len_loss: False
+  loss_filename: ./losses.txt
   denoiser:
     backbone: NodeEdgeNet
     num_blocks: 6
