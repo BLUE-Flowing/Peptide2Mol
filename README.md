@@ -68,6 +68,8 @@ tar -xzvf dataset.tar.gz -C dataset
 mv final_csv_goodH.csv dataset/
 ```
 
+---
+
 ### Preprocessing
 After downloading and extracting the dataset into the **`dataset/`** folder, run the preprocessing script to convert the SDF files into PyTorch `.pt` files for model training:
 ```bash
@@ -80,6 +82,8 @@ Then, the processed dataset file data.pt will be saved in the **dataset/** direc
 If you plan to retrain the model, make sure the path to data.pt is correct.
 > **Note:** Preprocessing may take up to three hours.
 
+---
+
 ## Training Weights
 
 **The pretrained model weights** can be downloaded from the [release page](https://github.com/BLUE-Flowing/Peptide2Mol/releases/tag/v1.0).  
@@ -91,6 +95,8 @@ After downloading, place the checkpoint file in the following directory: **'./ck
 mkdir -p ckpts
 mv PMT_major.ckpt ckpts/
 ```
+
+---
 
 ## Usage
 
@@ -199,7 +205,7 @@ DATA_DIR=./demo/example MODEL=Moldiff_test_partial LMDB_FILE=PBmol_2qtg.pt SAMPL
 The generated results will be stored in **`./output/PBmol_2qtg_SDF`**, including:
   - **100** generated small molecules, partially conditioned on the input fragment
   - Original pocket structures corresponding to the protein target
----
+
 
 ### (Optional) Step 4: Fix Molecules with Pocket2Mol
 
@@ -249,7 +255,7 @@ DATA_DIR=./dataset EXPERIMENT=mol_test LMDB_FILE=data.pt NUM_TRAIN=370000 LOG_DI
    - Monitor training progress through logs in specified `log_dir`
    - Use absolute paths if running from different directories
    - Consider using nohup or TMUX for long training sessions
-
+---
 
 ## License
 
