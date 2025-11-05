@@ -231,10 +231,9 @@ DATA_DIR=./dataset EXPERIMENT=mol_test LMDB_FILE=data.pt NUM_TRAIN=370000 LOG_DI
 
  - **Key Parameters:**
    - `DATA_DIR`: Path to the folder containing your training `.pt` or LMDB data files.
-   - `+data.lmdb_fn`: Filename of your training data file
-   - `+data.num_train`: Number of training samples (adjust based on your dataset)
-   - `++data.batch_size`: Batch size (reduce if encountering GPU memory issues)
-   - `++paths.log_dir`: Directory to save training logs and checkpoints
+   - `LMDB_FILE`: The dataset file to use for training (e.g., `data.pt`).
+   - `NUM_TRAIN`: Number of training samples (adjust based on your dataset)
+   - `LOG_DIR`: Directory to save training logs and checkpoints
 
  - **General Tips:**
    - Ensure your data files are in the correct directory structure
