@@ -29,6 +29,7 @@ class MolWrapper(nn.Module):
         self.pdb_dir = layer_configs['sample']['pdb_dir']
         self.sample_batch_size = layer_configs['sample']['batch_size']
         self.sample_max = layer_configs['sample']['max_size']
+        self.loss_filename = layer_configs['loss_filename']
 
     def forward(self, batch):
         pos_noise = torch.randn_like(batch.node_pos) * self.pos_noise_std
