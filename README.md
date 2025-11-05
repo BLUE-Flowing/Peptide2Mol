@@ -226,7 +226,7 @@ The output will be saved in `../output_fixed`.
 To retrain the main Peptide2Mol model, use the following command structure:
 
 ```bash
-DATA_DIR=./dataset EXPERIMENT=mol_test LMDB_FILE=data.pt NUM_TRAIN=370000 LOG_DIR=./logs_retrain bash scripts/inference.sh
+DATA_DIR=./dataset EXPERIMENT=mol_test LMDB_FILE=data.pt NUM_TRAIN=370000 LOG_DIR=./logs_retrain bash scripts/train.sh
 ```
 
  - **Key Parameters:**
