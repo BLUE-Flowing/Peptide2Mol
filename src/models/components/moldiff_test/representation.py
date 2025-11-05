@@ -180,7 +180,7 @@ class MolDiff(Module):
         Predict Mol at step `0` given perturbed Mol at step `t` with hidden dims and time step
         """
         # 1 node and edge embedding + time embedding
-                time_embed_node = self.time_emb(t.index_select(0, batch_node))
+        time_embed_node = self.time_emb(t.index_select(0, batch_node))
         poc_embed_node = self.poc_emb(poc_or_not)
         dtype = self.node_embedder.weight.dtype
         device = self.node_embedder.weight.device
