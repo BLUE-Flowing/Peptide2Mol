@@ -203,7 +203,7 @@ class MolWrapper(nn.Module):
                     type_index = ref_index_to_type[true_edge_tuple]
                     long_edge_types.append(ref_data.halfedge_type[type_index])
                 else:
-                    long_edge_types.append(torch.tensor([0, 0, 0, 0, 0, 0, 0, 1]))
+                    long_edge_types.append(torch.tensor([0, 0, 0, 0, 0, 1]))
 
             long_edge_types = torch.stack(long_edge_types)
             idx_start += (n_nodes + ref_data.num_nodes)
