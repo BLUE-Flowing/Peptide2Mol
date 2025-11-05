@@ -17,6 +17,8 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 
 - [Setup Environment](#setup-environment)
 - [Dataset (Optional)](#optional-dataset)
+  - [Downloading](#downloading)
+  - [Preprocessing](#preprocessing)
 - [Training Weights](#training-weights)
 - [Data Preparation](#data-preparation)
   - [Step1 Prepare Protein Inputs](#step-1-prepare-protein-inputs)
