@@ -157,7 +157,8 @@ If you wish to generate `.pt` files for only part of the ligand, follow these st
    - The second `./demo/example` specifies the output path where the `.pt` files will be saved.
    
    Adjust the paths according to your needs.
-   
+
+---
 
 ### Inference
 
