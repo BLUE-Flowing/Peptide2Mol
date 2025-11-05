@@ -190,7 +190,7 @@ The generated results will be stored in **`./output/1bvr_poc_SDF`**, including:
  - **100** generated small molecules
  - Original pocket structures corresponding to the protein target
 
-This allows users to quickly verify the **de novo generation workflow**.
+This allows reviewers to quickly verify the **de novo generation workflow**.
 
 #### Partial generation:
 
