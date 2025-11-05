@@ -180,7 +180,7 @@ class MolWrapper(nn.Module):
                 diffu_idx.append(i + idx_start)
             
 
-            node_padding_init = torch.randn(n_nodes, 29)
+            node_padding_init = torch.randn(n_nodes, 8)
             ref_data = ref_data.to(node_padding_init.device)
             type_padded = torch.cat([node_padding_init, ref_data.node_type])
             node_padding.append(type_padded)
@@ -205,7 +205,7 @@ class MolWrapper(nn.Module):
                     type_index = ref_index_to_type[true_edge_tuple]
                     long_edge_types.append(ref_data.halfedge_type[type_index])
                 else:
-                    long_edge_types.append(torch.tensor([0, 0, 0, 0, 0, 0, 0, 1]))
+                    long_edge_types.append(torch.tensor([0, 0, 0, 0, 0, 1]))
 
             long_edge_types = torch.stack(long_edge_types)
 
