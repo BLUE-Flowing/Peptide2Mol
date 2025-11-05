@@ -62,7 +62,8 @@ pip install Bio==1.6.2
 ## (Optional) Dataset
 
 To train the **Peptide2Mol** model from scratch, you can download the original dataset from **Google Drive**:
-👉 [Download the dataset (Drive folder)](https://drive.google.com/drive/folders/1I2uyFPSfeDS1ZXzKxw4ZQ5cu74sQGtSD?hl=zh)
+
+[Download the dataset (Drive folder)](https://drive.google.com/drive/folders/1I2uyFPSfeDS1ZXzKxw4ZQ5cu74sQGtSD?hl=zh)
 
 After downloading, you should have:
 - **dataset.tar.gz** # compressed dataset containing structure files
