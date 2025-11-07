@@ -52,7 +52,7 @@ run_training() {
     echo ""
 
     # Execute the training command
-    CUDA_VISIBLE_DEVICES=6 python src/train.py \
+    python src/train.py \
         experiment=$EXPERIMENT \
         ++paths.data_dir=$DATA_DIR \
         ++data.lmdb_fn=$LMDB_FILE \
