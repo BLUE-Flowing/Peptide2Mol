@@ -23,7 +23,7 @@ class MolLitModule(LightningModule):
     ) -> None:
         
         super().__init__()
-        self.automatic_optimization = False
+
         self.save_hyperparameters(logger=False)
         self.nn = self.hparams.net
 
@@ -115,7 +115,7 @@ class MolLitModule(LightningModule):
                 self.losses[stage]["loss_pos"].append(step_losses_pos.detach())
                 self.losses[stage]["loss_node"].append(step_losses_node.detach())
                 self.losses[stage]["loss_edge"].append(step_losses_edge.detach())
-                # print(f"Step {self.step_count}: {step_losses.item()}")
+                # print(f"Step Loss {step_losses.item()}")
                 # Track per-sample losses and indices for first 30 batches
                 if self.batch_count < self.max_batches and indices is not None:
                     self.sample_losses.extend([loss_total1.detach().cpu().numpy()])
@@ -142,58 +142,46 @@ class MolLitModule(LightningModule):
             print(f"Runtime error in model_step: {e}")
             raise
 
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
-        optimizer = self.optimizers()  # manual optimizer
-
+    def training_step(
+        self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> torch.Tensor:
         try:
-            # indices
+            # Extract indices from batch, assuming they are included
             if isinstance(batch, tuple) and len(batch) > 2:
-                indices = batch[-1]
+                indices = batch[-1]  # Adjust based on your batch structure
             else:
+                # Fallback: Generate indices based on batch_idx and batch size
                 batch_size = len(batch[0]) if isinstance(batch, tuple) else len(batch)
                 indices = torch.arange(batch_idx * batch_size, (batch_idx + 1) * batch_size, device=self.device)
-
-            # move to device
-            if isinstance(batch, tuple):
-                batch_on_device = tuple((b.to(self.device) if hasattr(b, "to") else b) for b in batch)
-            else:
-                batch_on_device = batch.to(self.device)
-
-            # Disable AMP for manual optimization path
-            with torch.cuda.amp.autocast(enabled=False):
-                loss = self.model_step(batch_on_device, "train", batch_idx, indices)
-
-            if loss is None:
-                return torch.zeros(1, device=self.device, requires_grad=True)
-
-            # manual zero/ backward / step (no scaler involvement)
-            optimizer.zero_grad(set_to_none=True)
-            loss.backward()
-            optimizer.step()
-
-            # bookkeeping
+            
+            loss = self.model_step(batch, "train", batch_idx, indices)
             self.num_samples["train"] += len(batch[0]) if isinstance(batch, tuple) else len(batch)
             self.batch_count += 1
 
+            # Trigger retraining after 30 batches
             if self.batch_count == self.max_batches and self.sample_losses:
-                # in DDP, consider guard: if self.trainer.is_global_zero: self._retrain_poor_cases()
                 self._retrain_poor_cases()
 
-            # Return loss for logging (no grad)
-            return loss.detach()
+            return loss
         except RuntimeError as e:
-            msg = str(e).lower()
-            if "out of memory" in msg or "input mismatch" in msg:
-                print(f"| WARNING: skipping batch due to runtime error: {e}")
+            if 'out of memory' in str(e):
+                print('| WARNING: ran out of memory, skipping batch')
                 for p in self.nn.parameters():
                     if p.grad is not None:
                         del p.grad
                 torch.cuda.empty_cache()
-                return torch.zeros(1, device=self.device, requires_grad=True)
+                print('cleaned')
+                return None
+            elif 'Input mismatch' in str(e):
+                print('| WARNING: weird torch_cluster error, skipping batch')
+                for p in self.nn.parameters():
+                    if p.grad is not None:
+                        del p.grad
+                torch.cuda.empty_cache()
+                return None
             else:
-                raise
-
-
+                print(e)
+                return None
 
     def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> None:
         """Perform a single validation step on a batch of data from the validation set.
@@ -210,22 +198,20 @@ class MolLitModule(LightningModule):
                 print('| WARNING: ran out of memory, skipping batch')
                 for p in self.nn.parameters():
                     if p.grad is not None:
-                        del p.grad
+                        del p.grad  # free some memory
                 torch.cuda.empty_cache()
-                # Return dummy zero loss to keep Lightning AMP happy
-                return torch.zeros(1, device=self.device, requires_grad=True)
-
+                # continue
             elif 'Input mismatch' in str(e):
                 print('| WARNING: weird torch_cluster error, skipping batch')
                 for p in self.nn.parameters():
                     if p.grad is not None:
-                        del p.grad
+                        del p.grad  # free some memory
                 torch.cuda.empty_cache()
-                return torch.zeros(1, device=self.device, requires_grad=True)
-
+                # continue
             else:
+                #raise e
                 print(e)
-                return torch.zeros(1, device=self.device, requires_grad=True)
+                # continue
 
     def on_validation_epoch_end(self) -> None:
         "Lightning hook that is called when a validation epoch ends."
@@ -292,28 +278,24 @@ class MolLitModule(LightningModule):
             try:
                 loss.backward(*args, **kwargs)
             except RuntimeError as e:
-                if 'out of memory' in str(e).lower():
-                    print('| WARNING: ran out of memory during backward, skipping batch')
+                if 'out of memory' in str(e):
+                    print('| WARNING: ran out of memory, skipping batch')
                     for p in self.nn.parameters():
                         if p.grad is not None:
-                            del p.grad
+                            del p.grad  # free some memory
                     torch.cuda.empty_cache()
-                    # Return dummy zero gradient to keep AMP scaler stable
-                    dummy = torch.zeros(1, device=self.device, requires_grad=True)
-                    dummy.backward()
-                    return
+                    # continue
                 elif 'Input mismatch' in str(e):
-                    print('| WARNING: weird torch_cluster error during backward, skipping batch')
+                    print('| WARNING: weird torch_cluster error, skipping batch')
                     for p in self.nn.parameters():
                         if p.grad is not None:
-                            del p.grad
+                            del p.grad  # free some memory
                     torch.cuda.empty_cache()
-                    dummy = torch.zeros(1, device=self.device, requires_grad=True)
-                    dummy.backward()
-                    return
+                    # continue
                 else:
-                    print(f'Unexpected error in backward: {e}')
-                    raise
+                    #raise e
+                    print(e)
+                    # continue
 
 
     def configure_optimizers(self) -> Dict[str, Any]:
@@ -365,70 +347,52 @@ class MolLitModule(LightningModule):
         self.num_samples[stage] = 0
 
     def _retrain_poor_cases(self):
+        # Identify poor-performing cases
         sample_losses = np.array(self.sample_losses).flatten()
         sample_indices = np.array(self.sample_indices)
         threshold = np.percentile(sample_losses, self.poor_case_threshold)
         poor_indices = sample_indices[sample_losses > threshold]
 
         if len(poor_indices) == 0:
+            print('No poor-performing cases found. Continuing training.')
+            # Reset tracking for the next 30 batches
             self.sample_losses = []
             self.sample_indices = []
             self.batch_count = 0
             return
-        else:
-            print(f'Found {len(poor_indices)} poor-performing cases. Retraining them.')
 
+        # Create a subset dataset for poor-performing cases
         poor_dataset = Subset(self.trainer.train_dataloader.dataset, poor_indices)
+        
+        # Use the same collate function as the original dataloader
         poor_dataloader = DataLoader(
             poor_dataset,
-            batch_size=max(1, self.trainer.train_dataloader.batch_size // 2),
+            batch_size=self.trainer.train_dataloader.batch_size//2,
             shuffle=True,
             num_workers=self.trainer.train_dataloader.num_workers,
-            pin_memory=getattr(self.trainer.train_dataloader, "pin_memory", True),
-            collate_fn=self.trainer.train_dataloader.collate_fn,
+            pin_memory=True,
+            collate_fn=self.trainer.train_dataloader.collate_fn
         )
 
-        optimizer = self.trainer.optimizers[0]
-
-        self.is_extra_training = True
-        self.train()
-
+        # Train poor-performing cases for extra epochs
+        self.is_extra_training = True  # Set flag for extra training
         for epoch in range(self.extra_epochs):
             self._reset_losses_dict("train")
             self.num_samples["train"] = 0
-
             for batch_idx, batch in enumerate(poor_dataloader):
-                # move to device
+                # Move batch to GPU
                 if isinstance(batch, tuple):
-                    batch_on_device = tuple((b.to(self.device) if hasattr(b, "to") else b) for b in batch)
+                    batch = tuple(b.to(self.device) for b in batch)
                 else:
-                    batch_on_device = batch.to(self.device)
-
-                try:
-                    # disable AMP here too
-                    with torch.cuda.amp.autocast(enabled=False):
-                        loss = self.model_step(batch_on_device, "train", batch_idx, indices=None)
-
-                    if loss is None:
-                        continue
-
-                    optimizer.zero_grad(set_to_none=True)
-                    loss.backward()
-                    optimizer.step()
-
-                except RuntimeError as e:
-                    msg = str(e).lower()
-                    if "out of memory" in msg or "input mismatch" in msg:
-                        print(f"| WARNING: skipping batch in extra training due to runtime error: {e}")
-                        for p in self.nn.parameters():
-                            if p.grad is not None:
-                                del p.grad
-                        torch.cuda.empty_cache()
-                        continue
-                    else:
-                        raise
-
-        self.is_extra_training = False
+                    batch = batch.to(self.device)
+                    
+                loss = self.training_step(batch, batch_idx)
+                if loss is not None:
+                    # Backward pass
+                    self.backward(loss)
+        
+        self.is_extra_training = False  # Reset flag after extra training
+        # Reset tracking for the next 30 batches
         self.sample_losses = []
         self.sample_indices = []
         self.batch_count = 0
