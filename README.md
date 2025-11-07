@@ -28,6 +28,7 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 - [Step4 Fix Molecules with Pocket2Mol (Optional)](#optional-step-4-fix-molecules-with-pocket2mol)
 - [Retraining Peptide2Mol](#retraining-peptide2mol)
 - [License](#license)
+- [Arxiv Submission](#arxiv-submission)
 ---
 
 ## Setup Environment
