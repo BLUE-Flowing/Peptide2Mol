@@ -264,4 +264,12 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ---
 
+## Arxiv Submission
+
+This work has been submitted to arXiv **(temporary submission number: submit/6962577).**
+
+The final arXiv link and reference will be updated once available.
+
+---
+
 Thank you for using **Peptide2Mol**! If you have any questions or encounter any issues, please don't hesitate to reach out.
