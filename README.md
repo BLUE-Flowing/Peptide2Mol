@@ -267,6 +267,12 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ## Arxiv Submission
 
+### Preprint
+This work has been made publicly available as a preprint on arXiv:  
+[Peptide2Mol: A Diffusion Model for Generating Small Molecules as Peptide Mimics for Targeted Protein Binding](https://arxiv.org/abs/2511.04984)
+
+### Citation
+
 If you find this work useful, please cite:
 
 ```bibtex
