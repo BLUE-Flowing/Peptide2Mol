@@ -267,9 +267,17 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ## Arxiv Submission
 
-This work has been submitted to **arXiv** **(temporary submission number: submit/6962577).**
+If you find this work useful, please cite:
 
-The final arXiv link and reference will be updated once available.
+```bibtex
+@article{he2025peptide2mol,
+  title     = {Peptide2Mol: A Diffusion Model for Generating Small Molecules as Peptide Mimics for Targeted Protein Binding},
+  author    = {He, Xinheng and Zhang, Yijia and Lin, Haowei and Peng, Xingang and Kong, Xiangzhe and Li, Mingyu and Ma, Jianzhu},
+  journal   = {arXiv preprint arXiv:2511.04984},
+  year      = {2025},
+  url       = {https://arxiv.org/abs/2511.04984}
+}
+```
 
 ---
 
