@@ -61,7 +61,7 @@ conda activate peptide2mol
 pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.2.2+cu121.html
 ```
 
-### CUDA 12.8 / Blackwell-compatible environment
+### NEW CUDA 12.8 environment
 
 For newer GPU/software stacks, including systems that require CUDA >= 12.8, use the CUDA 12.8 environment file:
 
@@ -79,8 +79,6 @@ pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https:
 ```
 
 The CUDA 12.8 stack was tested with PyTorch 2.7.0+cu128 and matching PyTorch-Geometric extension wheels. The released checkpoint loads successfully, and both de novo generation and partial-generation smoke tests run under this setup.
-
-For PyTorch >= 2.6, Peptide2Mol explicitly loads trusted project checkpoints with `weights_only=False`, because the released Lightning checkpoints contain project metadata in addition to tensor weights.
 
 ---
 ## (Optional) Dataset
