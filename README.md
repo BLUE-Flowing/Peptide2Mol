@@ -40,9 +40,7 @@ Peptide2Mol provides two environment configurations:
 | Environment | YAML file | Intended use | Validation status |
 | --- | --- | --- | --- |
 | CUDA 12.1 | `env_cu121.yaml` | Original released environment | Official release environment |
-| CUDA 12.8 | `env_cu128.yaml` | Newer CUDA stacks, including Blackwell-compatible setups | Smoke-tested with PyTorch 2.7.0+cu128 on an NVIDIA A800 machine with a CUDA 12.8 driver |
-
-> **Note:** The CUDA 12.8 environment has not yet been validated on actual Blackwell hardware. Validation reports from Blackwell users are welcome.
+| CUDA 12.8 | `env_cu128.yaml` | Newer CUDA stacks, Smoke-tested with PyTorch 2.7.0+cu128 on an NVIDIA A800 machine with a CUDA 12.8 driver |
 
 ### Default CUDA 12.1 environment
 
