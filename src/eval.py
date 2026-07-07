@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Tuple
 
 import hydra
 import rootutils
+import inspect
 from lightning import LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
@@ -35,6 +36,21 @@ from notebooks.deal_with_mol_5A import Drug3DData
 log = RankedLogger(__name__, rank_zero_only=True)
 import torch
 torch.set_float32_matmul_precision('medium')
+
+def load_trusted_checkpoint(model: LightningModule, ckpt_path: str) -> None:
+    """Load project checkpoints across PyTorch versions.
+
+    PyTorch >=2.6 defaults torch.load(..., weights_only=True). The released
+    Lightning checkpoints contain project objects in their metadata, so trusted
+    Peptide2Mol checkpoints must be loaded with weights_only=False.
+    """
+    load_kwargs = {"map_location": "cpu"}
+    if "weights_only" in inspect.signature(torch.load).parameters:
+        load_kwargs["weights_only"] = False
+
+    checkpoint = torch.load(ckpt_path, **load_kwargs)
+    state_dict = checkpoint.get("state_dict", checkpoint)
+    model.load_state_dict(state_dict, strict=True)
 
 @task_wrapper
 def evaluate(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
@@ -74,8 +90,11 @@ def evaluate(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         log.info("Logging hyperparameters!")
         log_hyperparameters(object_dict)
 
+    log.info(f"Loading checkpoint <{cfg.ckpt_path}>")
+    load_trusted_checkpoint(model, cfg.ckpt_path)
+
     log.info("Starting testing!")
-    trainer.test(model=model, datamodule=datamodule, ckpt_path=cfg.ckpt_path)
+    trainer.test(model=model, datamodule=datamodule, ckpt_path=None)
 
     # for predictions use trainer.predict(...)
     # predictions = trainer.predict(model=model, dataloaders=dataloaders, ckpt_path=cfg.ckpt_path)

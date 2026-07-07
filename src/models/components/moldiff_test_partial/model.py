@@ -116,7 +116,9 @@ class MolWrapper(nn.Module):
                     pred_halfedge=output_mol['pred'][2],
                     halfedge_index=output_mol['halfedge_index'],
                 )
-                pickle.dump(mol_info, open(f'/home/chengxi/data/work/test/comp2404/PMT/PMT_1214/sam_250114/{len(pool.failed)}_mol.pkl','wb'))
+                pickle_path = os.path.join(sdf_dir, f'{len(pool.failed)}_mol.pkl')
+                with open(pickle_path, 'wb') as f:
+                    pickle.dump(mol_info, f)
                 try:
                     rdmol = self.reconstruct_from_generated_with_edges(mol_info)
                 except:
