@@ -16,6 +16,8 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 ## Quick Links
 
 - [Setup Environment](#setup-environment)
+  - [Default CUDA 12.1 environment](#default-cuda-121-environment)
+  - [CUDA 12.8 / Blackwell-compatible environment](#cuda-128--blackwell-compatible-environment)
 - [Dataset (Optional)](#optional-dataset)
   - [Downloading](#downloading)
   - [Preprocessing](#preprocessing)
@@ -33,7 +35,18 @@ For any questions or issues, feel free to [open an issue](https://github.com/BLU
 
 ## Setup Environment
 
-Follow these steps to set up an Anaconda environment for running Peptide2Mol. Ensure compatibility by installing the specified versions of **PyTorch, PyTorch-Geometric, CUDA (if applicable)**, and other dependencies:
+Peptide2Mol provides two environment configurations:
+
+| Environment | YAML file | Intended use | Validation status |
+| --- | --- | --- | --- |
+| CUDA 12.1 | `env_cu121.yaml` | Original released environment | Official release environment |
+| CUDA 12.8 | `env_cu128.yaml` | Newer CUDA stacks, including Blackwell-compatible setups | Smoke-tested with PyTorch 2.7.0+cu128 on an NVIDIA A800 machine with a CUDA 12.8 driver |
+
+> **Note:** The CUDA 12.8 environment has not yet been validated on actual Blackwell hardware. Validation reports from Blackwell users are welcome.
+
+### Default CUDA 12.1 environment
+
+The original released environment is based on Python 3.9, PyTorch 2.2.2, and CUDA 12.1.
 
 ```bash
 # 1. Clone the repository
@@ -48,10 +61,28 @@ conda activate peptide2mol
 pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.2.2+cu121.html
 ```
 
-> **Note:** The env_cu121.yaml file is pre-configured for Python 3.9 and CUDA 12.1. If you are using a different GPU or CUDA version, adjust the YAML file or PyTorch-Geometric wheel URL accordingly.
+### CUDA 12.8 / Blackwell-compatible environment
+
+For newer GPU/software stacks, including systems that require CUDA >= 12.8, use the CUDA 12.8 environment file:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/BLUE-Flowing/Peptide2Mol.git
+cd Peptide2Mol
+
+# 2. Create the Conda environment from the CUDA 12.8 YAML file
+conda env create -f env_cu128.yaml
+conda activate peptide2mol
+
+# 3. Install PyTorch-Geometric dependencies for PyTorch 2.7.0 + CUDA 12.8
+pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.7.0+cu128.html
+```
+
+The CUDA 12.8 stack was tested with PyTorch 2.7.0+cu128 and matching PyTorch-Geometric extension wheels. The released checkpoint loads successfully, and both de novo generation and partial-generation smoke tests run under this setup.
+
+For PyTorch >= 2.6, Peptide2Mol explicitly loads trusted project checkpoints with `weights_only=False`, because the released Lightning checkpoints contain project metadata in addition to tensor weights.
 
 ---
-
 ## (Optional) Dataset
 
 ### Downloading
@@ -193,7 +224,7 @@ This allows reviewers to quickly verify the **de novo generation workflow**.
 
 #### Partial generation:
 
-To perform partial generation (e.g., ignoring some peptide structure to strengthing ), run the following command:
+To perform partial generation, run the following command:
 ```bash
 DATA_DIR=./demo/example MODEL=Moldiff_test_partial LMDB_FILE=PBmol_2qtg.pt SAMPLE_OUTPUT_DIR=./output/PBmol_2qtg bash scripts/inference.sh
 ```
@@ -235,6 +266,7 @@ python get_wrong_atom_index.py ../output/ 1bvr
 ```
 
 Each molecule takes approximately one minute to process on an NVIDIA A100 GPU, and the corrected structures will be saved in  `../output_fixed`.
+
 ---
 
 ## Retraining Peptide2Mol
